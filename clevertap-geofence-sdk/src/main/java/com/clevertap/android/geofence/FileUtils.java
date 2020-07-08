@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 
 public class FileUtils {
 
-    public static void writeJsonToFile(Context context, CTGeofenceAPI ctGeofenceAPI, String dirName, String fileName, JSONObject jsonObject) {
+    synchronized public static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
         try {
             if (jsonObject == null || TextUtils.isEmpty(dirName) || TextUtils.isEmpty(fileName))
                 return;
@@ -31,12 +31,11 @@ public class FileUtils {
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
-            if (ctGeofenceAPI != null)
-                ctGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + e.getLocalizedMessage());
+            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + e.getLocalizedMessage());
         }
     }
 
-    public static String readFromFile(Context context, CTGeofenceAPI ctGeofenceAPI, String fileNameWithPath) throws Exception {
+    synchronized public static String readFromFile(Context context, String fileNameWithPath){
 
         String content = "";
         //Make sure to use a try-catch statement to catch any errors
@@ -62,14 +61,13 @@ public class FileUtils {
             inputStream.close();
             content = stringBuilder.toString();
         } catch (Exception e) {
-            if (ctGeofenceAPI != null)
-                ctGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "[Exception While Reading: " + e.getLocalizedMessage());
+            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "[Exception While Reading: " + e.getLocalizedMessage());
             //Log your error with Log.e
         }
         return content;
     }
 
-    public static void deleteDirectory(Context context, CTGeofenceAPI ctGeofenceAPI, String dirName) {
+    public static void deleteDirectory(Context context, String dirName) {
         if (TextUtils.isEmpty(dirName) || context == null)
             return;
         try {
@@ -82,29 +80,25 @@ public class FileUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (ctGeofenceAPI != null)
-                ctGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + dirName + " Error:" + e.getLocalizedMessage());
+            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + dirName + " Error:" + e.getLocalizedMessage());
         }
     }
 
-    public static void deleteFile(Context context, CTGeofenceAPI ctGeofenceAPI, String fileName) throws Exception {
+    public static void deleteFile(Context context, String fileName) throws Exception {
         if (TextUtils.isEmpty(fileName) || context == null)
             return;
         try {
             File file = new File(context.getFilesDir(), fileName);
             if (file.exists()) {
                 if (file.delete()) {
-                    if (ctGeofenceAPI != null)
-                        ctGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "File Deleted:" + fileName);
+                    CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "File Deleted:" + fileName);
                 } else {
-                    if (ctGeofenceAPI != null)
-                        ctGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to delete file" + fileName);
+                    CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to delete file" + fileName);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (ctGeofenceAPI != null)
-                ctGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + fileName + " Error:" + e.getLocalizedMessage());
+            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + fileName + " Error:" + e.getLocalizedMessage());
         }
     }
 }

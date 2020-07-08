@@ -50,8 +50,7 @@ public class CTGeofenceService extends JobIntentService {
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
+                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
 
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
@@ -59,11 +58,7 @@ public class CTGeofenceService extends JobIntentService {
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
             Location triggeringLocation = geofencingEvent.getTriggeringLocation();
 
-            JSONObject jsonObject = toJsonObject(triggeringGeofences, triggeringLocation);
-
-            CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceContract()
-                    .geofenceTransitionHit(jsonObject);
-
+            pushGeofenceEvents(triggeringGeofences, triggeringLocation, geofenceTransition);
 
         } else {
             // Log the error.
@@ -72,32 +67,93 @@ public class CTGeofenceService extends JobIntentService {
         }
     }
 
-    private JSONObject toJsonObject(List<Geofence> triggeringGeofences, Location triggeringLocation) {
+    private void pushGeofenceEvents(List<Geofence> triggeringGeofences, Location triggeringLocation,
+                                    int geofenceTransition) {
 
+        //TODO: Finalize contract for geofence trigger event
+        //TODO: what if triggered event read fence data from file and before that new data gets written due to location updates
         if (triggeringGeofences == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "fetched triggered geofence list is null");
-            return null;
+            return;
 
         }
-        JSONObject jsonObject = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
 
-        for (Geofence geofence : triggeringGeofences) {
-            jsonArray.put(geofence.getRequestId());
+        boolean isTriggeredGeofenceFound = false;
 
-        }
-        try {
-            if (triggeringLocation != null) {
-                jsonObject.put("latitude", triggeringLocation.getLatitude());
-                jsonObject.put("longitude", triggeringLocation.getLongitude());
+
+        // Search triggered geofences in file by id and send stored geofence object to CT SDK
+        String oldFenceListString = FileUtils.readFromFile(getApplicationContext(), CTGeofenceConstants.CACHED_FULL_PATH);
+        if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
+
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject(oldFenceListString);
+                JSONArray jsonArray = jsonObject.getJSONArray(CTGeofenceConstants.KEY_GEOFENCES);
+
+                for (Geofence triggeredGeofence : triggeringGeofences) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject geofence = jsonArray.getJSONObject(i);
+                        if (String.valueOf(geofence.getInt(CTGeofenceConstants.KEY_ID))
+                                .equals(triggeredGeofence.getRequestId())) {
+                            // triggered geofence found in file
+
+                            isTriggeredGeofenceFound = true;
+
+                            geofence.put("triggered_lat", triggeringLocation.getLatitude());
+                            geofence.put("triggered_lng", triggeringLocation.getLongitude());
+
+                            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                                CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
+                                        .pushGeofenceEnteredEvent(geofence);
+                            } else {
+                                CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
+                                        .pushGeoFenceExitedEvent(geofence);
+                            }
+
+                            break;
+
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Failed to read triggered geofences from file");
+                e.printStackTrace();
             }
-            jsonObject.put("triggered_fences", jsonArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
-        return jsonObject;
+
+        // due to some reasons if triggered fences is not found then push below response
+        if (!isTriggeredGeofenceFound) {
+
+            JSONObject jsonObject = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
+
+            for (Geofence geofence : triggeringGeofences) {
+                jsonArray.put(geofence.getRequestId());
+
+            }
+            try {
+                if (triggeringLocation != null) {
+                    jsonObject.put("triggered_lat", triggeringLocation.getLatitude());
+                    jsonObject.put("triggered_lng", triggeringLocation.getLongitude());
+                }
+                jsonObject.put("triggered_fences", jsonArray);
+
+                if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                    CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
+                            .pushGeofenceEnteredEvent(jsonObject);
+                } else {
+                    CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
+                            .pushGeoFenceExitedEvent(jsonObject);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     @Override

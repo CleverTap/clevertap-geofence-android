@@ -1,6 +1,7 @@
 package com.clevertap.android.geofence.model;
 
 import com.clevertap.android.geofence.CTGeofenceAPI;
+import com.clevertap.android.geofence.CTGeofenceConstants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,20 +97,44 @@ public class CTGeofence {
                 for (int i = 0; i < array.length(); i++) {
 
                     JSONObject object = array.getJSONObject(i);
-                    CTGeofence geofence = new Builder(object.getString("geofence_id"))
-                            .setLatitude((Float) object.get("latitude"))
-                            .setLongitude((Float) object.get("longitude"))
-                            .setRadius(object.getInt("radius"))
+                    CTGeofence geofence = new Builder(String.valueOf(object.getInt(CTGeofenceConstants.KEY_ID)))
+                            .setLatitude((Float) object.get("lat"))
+                            .setLongitude((Float) object.get("lng"))
+                            .setRadius(object.getInt("r"))
                             .build();
                     geofenceList.add(geofence);
                 }
             }
         } catch (JSONException e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Could not convert JSON to GeofenceList - " + e.getMessage());
+            e.printStackTrace();
         }
 
         return geofenceList;
 
+    }
+
+    public static List<String> toIds(JSONObject jsonObject) {
+
+        ArrayList<String> geofenceIdList = new ArrayList<>();
+
+        try {
+            JSONArray array = jsonObject.getJSONArray("geofences");
+
+            if (array != null) {
+                for (int i = 0; i < array.length(); i++) {
+
+                    JSONObject object = array.getJSONObject(i);
+                    geofenceIdList.add(object.getString("id"));
+                }
+            }
+        } catch (JSONException e) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Could not convert JSON to GeofenceIdList - " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return geofenceIdList;
 
     }
 }

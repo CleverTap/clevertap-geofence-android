@@ -1,14 +1,28 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.clevertap.android.geofence">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application>
 
-        <receiver android:name=".CTGeofenceBroadcastReceiver" />
-        <receiver android:name=".CTLocationUpdateReceiver" />
+        <receiver android:name=".CTGeofenceBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.clevertap.android.geofence.fence.update" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".CTLocationUpdateReceiver">
+            <intent-filter>
+                <action android:name="com.clevertap.android.geofence.location.update" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".CTGeofenceService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".CTLocationUpdateService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 

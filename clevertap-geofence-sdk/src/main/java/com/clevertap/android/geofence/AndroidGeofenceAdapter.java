@@ -5,17 +5,14 @@ import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.LocationManager;
 
-import com.clevertap.android.geofence.interfaces.CTGeofenceRepository;
+import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.model.CTGeofence;
-import com.google.android.gms.location.Geofence;
 
-import java.security.Permission;
 import java.util.List;
 
-public class AndroidGeofenceRepository implements CTGeofenceRepository {
+public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
 
     private final Context context;
     private final LocationManager locationManager;
@@ -23,7 +20,7 @@ public class AndroidGeofenceRepository implements CTGeofenceRepository {
     private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = -1;
 
 
-    AndroidGeofenceRepository(Context context) {
+    AndroidGeofenceAdapter(Context context) {
         this.context = context;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
@@ -56,7 +53,13 @@ public class AndroidGeofenceRepository implements CTGeofenceRepository {
     }
 
     @Override
-    public void removeAllGeofence() {
+    public void removeAllGeofence(List<String> fenceIdList) {
 
     }
+
+    @Override
+    public void stopGeofenceMonitoring(PendingIntent pendingIntent) {
+
+    }
+
 }

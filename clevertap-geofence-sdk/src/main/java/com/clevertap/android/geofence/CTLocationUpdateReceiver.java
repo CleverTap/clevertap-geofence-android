@@ -16,15 +16,13 @@ class CTLocationUpdateReceiver extends BroadcastReceiver {
                     "Location updates receiver called");
 
             LocationResult result = LocationResult.extractResult(intent);
-            if (result != null && result.getLastLocation()!=null) {
-                Location newestLocation = result.getLastLocation();
-               CTGeofenceAPI.getInstance(context).getGeofenceContract().setLocation(newestLocation);
+            if (result != null && result.getLastLocation() != null) {
+                CTLocationUpdateService.enqueueWork(context.getApplicationContext(), intent);
             } else {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Location Result is null");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Exception while processing location updates receiver intent");
             e.printStackTrace();

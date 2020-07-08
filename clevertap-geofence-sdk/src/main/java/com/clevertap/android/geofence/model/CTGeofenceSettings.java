@@ -2,6 +2,8 @@ package com.clevertap.android.geofence.model;
 
 import com.clevertap.android.geofence.Logger.LogLevel;
 
+import java.util.Objects;
+
 public class CTGeofenceSettings {
 
 
@@ -76,5 +78,17 @@ public class CTGeofenceSettings {
 
     public LogLevel getLogLevel() {
         return logLevel;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CTGeofenceSettings that = (CTGeofenceSettings) o;
+        return backgroundLocationUpdates == that.backgroundLocationUpdates &&
+                locationAccuracy == that.locationAccuracy &&
+                locationFetchMode == that.locationFetchMode &&
+                logLevel == that.logLevel;
     }
 }

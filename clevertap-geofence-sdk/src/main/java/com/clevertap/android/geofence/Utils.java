@@ -5,7 +5,7 @@ import android.content.pm.PackageManager;
 
 import androidx.core.content.ContextCompat;
 
-public class Utils {
+class Utils {
 
     private static Boolean isPlayServicesDependencyAvailable;
     private static Boolean isFusedLocationDependencyAvailable;
