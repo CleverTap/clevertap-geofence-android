@@ -6,16 +6,16 @@
 
     <application>
 
-        <receiver android:name=".CTGeofenceBroadcastReceiver">
-            <intent-filter>
+        <receiver android:name=".CTGeofenceReceiver">
+            <!--<intent-filter>
                 <action android:name="com.clevertap.android.geofence.fence.update" />
-            </intent-filter>
+            </intent-filter>-->
         </receiver>
 
         <receiver android:name=".CTLocationUpdateReceiver">
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="com.clevertap.android.geofence.location.update" />
-            </intent-filter>
+            </intent-filter>-->
         </receiver>
 
         <service

@@ -36,7 +36,7 @@ public class CTGeofence {
         private float longitude;
         private int radius;
 
-        public Builder(String id) {
+        Builder(String id) {
             this.id = id;
         }
 
@@ -45,24 +45,23 @@ public class CTGeofence {
             return this;
         }
 
-        public CTGeofence.Builder setLatitude(float latitude) {
+        CTGeofence.Builder setLatitude(float latitude) {
             this.latitude = latitude;
             return this;
         }
 
-        public CTGeofence.Builder setLongitude(float longitude) {
+        CTGeofence.Builder setLongitude(float longitude) {
             this.longitude = longitude;
             return this;
         }
 
-        public CTGeofence.Builder setRadius(int radius) {
+        CTGeofence.Builder setRadius(int radius) {
             this.radius = radius;
             return this;
         }
 
-        public CTGeofence build() {
-            CTGeofence ctGeofence = new CTGeofence(this);
-            return ctGeofence;
+        CTGeofence build() {
+            return new CTGeofence(this);
         }
     }
 
@@ -93,17 +92,15 @@ public class CTGeofence {
         try {
             JSONArray array = jsonObject.getJSONArray("geofences");
 
-            if (array != null) {
-                for (int i = 0; i < array.length(); i++) {
+            for (int i = 0; i < array.length(); i++) {
 
-                    JSONObject object = array.getJSONObject(i);
-                    CTGeofence geofence = new Builder(String.valueOf(object.getInt(CTGeofenceConstants.KEY_ID)))
-                            .setLatitude((Float) object.get("lat"))
-                            .setLongitude((Float) object.get("lng"))
-                            .setRadius(object.getInt("r"))
-                            .build();
-                    geofenceList.add(geofence);
-                }
+                JSONObject object = array.getJSONObject(i);
+                CTGeofence geofence = new Builder(String.valueOf(object.getInt(CTGeofenceConstants.KEY_ID)))
+                        .setLatitude((Float) object.get("lat"))
+                        .setLongitude((Float) object.get("lng"))
+                        .setRadius(object.getInt("r"))
+                        .build();
+                geofenceList.add(geofence);
             }
         } catch (JSONException e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Could not convert JSON to GeofenceList - " + e.getMessage());
@@ -114,6 +111,7 @@ public class CTGeofence {
 
     }
 
+    // TODO: Does it makes sense to put this method here or move it somewhere else
     public static List<String> toIds(JSONObject jsonObject) {
 
         ArrayList<String> geofenceIdList = new ArrayList<>();
@@ -121,12 +119,10 @@ public class CTGeofence {
         try {
             JSONArray array = jsonObject.getJSONArray("geofences");
 
-            if (array != null) {
-                for (int i = 0; i < array.length(); i++) {
+            for (int i = 0; i < array.length(); i++) {
 
-                    JSONObject object = array.getJSONObject(i);
-                    geofenceIdList.add(object.getString("id"));
-                }
+                JSONObject object = array.getJSONObject(i);
+                geofenceIdList.add(object.getString(CTGeofenceConstants.KEY_ID));
             }
         } catch (JSONException e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,

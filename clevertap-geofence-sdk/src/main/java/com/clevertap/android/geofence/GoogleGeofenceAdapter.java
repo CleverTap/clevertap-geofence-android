@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.model.CTGeofence;
@@ -13,6 +14,8 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +39,9 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     }
 
+    @WorkerThread
     @Override
-    public void addAllGeofence(List<CTGeofence> fenceList) {
+    public void addAllGeofence(List<CTGeofence> fenceList, final OnSuccessListener onSuccessListener) {
 
         if (fenceList == null || fenceList.isEmpty()) {
             return;
@@ -50,20 +54,32 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
             PendingIntent geofencePendingIntent = PendingIntentFactory.getPendingIntent(context,
                     PendingIntentFactory.PENDING_INTENT_GEOFENCE, FLAG_UPDATE_CURRENT);
 
-            geofencingClient.addGeofences(getGeofencingRequest(googleFenceList), geofencePendingIntent)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence registered successfully");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence failed to register");
-                            e.printStackTrace();
-                        }
-                    });
+            Task<Void> addGeofenceTask = geofencingClient.addGeofences(getGeofencingRequest(googleFenceList), geofencePendingIntent);
+            // blocking task
+            Void aVoid = Tasks.await(addGeofenceTask);
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence registered successfully");
+
+            if (onSuccessListener != null) {
+                onSuccessListener.onSuccess(aVoid);
+            }
+
+            /*addGeofenceTask.addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // called on main thread
+                    if (onSuccessListener != null) {
+                        onSuccessListener.onSuccess(aVoid);
+                    }
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence registered successfully");
+                }
+            });
+            addGeofenceTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence failed to register");
+                    e.printStackTrace();
+                }
+            });*/
 
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -79,28 +95,40 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     }
 
+    @WorkerThread
     @Override
-    public void removeAllGeofence(List<String> fenceIdList) {
+    public void removeAllGeofence(List<String> fenceIdList, final OnSuccessListener onSuccessListener) {
 
         if (fenceIdList == null || fenceIdList.isEmpty()) {
             return;
         }
 
         try {
-            geofencingClient.removeGeofences(fenceIdList)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to remove registered geofences");
-                            e.printStackTrace();
-                        }
-                    });
+            Task<Void> removeGeofenceTask = geofencingClient.removeGeofences(fenceIdList);
+            // blocking task
+            Void aVoid = Tasks.await(removeGeofenceTask);
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
+
+            if (onSuccessListener != null) {
+                onSuccessListener.onSuccess(aVoid);
+            }
+
+            /*removeGeofenceTask.addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    if (onSuccessListener != null) {
+                        onSuccessListener.onSuccess(aVoid);
+                    }
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
+                }
+            });
+            removeGeofenceTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to remove registered geofences");
+                    e.printStackTrace();
+                }
+            });*/
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to remove registered geofences");
@@ -108,6 +136,7 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         }
     }
 
+    @WorkerThread
     @Override
     public void stopGeofenceMonitoring(final PendingIntent pendingIntent) {
 
@@ -118,23 +147,28 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         }
 
         try {
-            geofencingClient.removeGeofences(pendingIntent)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to remove registered geofences");
-                            e.printStackTrace();
-                        }
-                    });
+            Task<Void> removeGeofenceTask = geofencingClient.removeGeofences(pendingIntent);
+
+            // blocking task
+            Tasks.await(removeGeofenceTask);
+
+            /*removeGeofenceTask.addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
+                }
+            });
+            removeGeofenceTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to remove registered geofences");
+                    e.printStackTrace();
+                }
+            });*/
 
             // cancel pending intent when no further updates required
             pendingIntent.cancel();
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
 
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,

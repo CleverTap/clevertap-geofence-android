@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 
-public class CTLocationFactory {
+ class CTLocationFactory {
 
     static CTLocationAdapter createLocationAdapter(Context context){
 

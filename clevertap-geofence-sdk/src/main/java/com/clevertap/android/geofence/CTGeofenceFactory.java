@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 
-public class CTGeofenceFactory {
+ class CTGeofenceFactory {
 
     static CTGeofenceAdapter createGeofenceAdapter(Context context) {
 

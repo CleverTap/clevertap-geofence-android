@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -20,6 +21,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +51,7 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
         }
     }
 
+    @WorkerThread
     @Override
     public void requestLocationUpdates() {
         applySettings(context);
@@ -69,7 +72,10 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
 
             try {
                 // will overwrite location request if change in location config is detected
-                fusedProviderClient.requestLocationUpdates(getLocationRequest(), pendingIntent);
+                Task<Void> requestLocationUpdatesTask = fusedProviderClient.requestLocationUpdates(getLocationRequest(), pendingIntent);
+
+                // blocking task
+                Tasks.await(requestLocationUpdatesTask);
             } catch (Exception e) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Failed to request location updates");
@@ -99,6 +105,7 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
                 ExistingPeriodicWorkPolicy.KEEP, locationRequest);
     }
 
+    @WorkerThread
     @Override
     public void removeLocationUpdates(PendingIntent pendingIntent) {
         clearLocationUpdates(pendingIntent);
@@ -124,11 +131,9 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
             public void onComplete(@NonNull Task<Location> task) {
                 // get's called on main thread
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location fetch completed");
-                if (task != null) {
-                    Location lastLocation = task.getResult();
-                    callback.onLocationComplete(lastLocation);
+                Location lastLocation = task.getResult();
+                callback.onLocationComplete(lastLocation);
 
-                }
             }
         });
 
@@ -139,7 +144,7 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
         return 0;
     }
 
-    protected LocationRequest getLocationRequest() {
+    LocationRequest getLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(INTERVAL_IN_MILLIS);
         locationRequest.setFastestInterval(INTERVAL_FASTEST_IN_MILLIS);
@@ -178,6 +183,7 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
         }
     }
 
+    @WorkerThread
     private void clearLocationUpdates(PendingIntent pendingIntent) {
         if (pendingIntent == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -186,8 +192,15 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
         }
 
         try {
-            fusedProviderClient.removeLocationUpdates(pendingIntent);
+            Task<Void> removeLocationUpdatesTask = fusedProviderClient.removeLocationUpdates(pendingIntent);
+
+            // blocking task
+            Tasks.await(removeLocationUpdatesTask);
+
             pendingIntent.cancel();
+
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Location updates removed successfully");
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to remove location updates");

@@ -9,6 +9,7 @@ import android.location.LocationManager;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.model.CTGeofence;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
 
     @SuppressLint("MissingPermission")
     @Override
-    public void addAllGeofence(List<CTGeofence> fenceList) {
+    public void addAllGeofence(List<CTGeofence> fenceList, OnSuccessListener onSuccessListener) {
         Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
                 100, intent, 0);
@@ -53,7 +54,7 @@ public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
     }
 
     @Override
-    public void removeAllGeofence(List<String> fenceIdList) {
+    public void removeAllGeofence(List<String> fenceIdList, OnSuccessListener onSuccessListener) {
 
     }
 

@@ -46,7 +46,7 @@ public class CTGeofenceService extends JobIntentService {
         }
 
         // Get the transition type.
-        int geofenceTransition = geofencingEvent.getGeofenceTransition();
+        final int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
@@ -55,10 +55,18 @@ public class CTGeofenceService extends JobIntentService {
 
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
 
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-            Location triggeringLocation = geofencingEvent.getTriggeringLocation();
+            final List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+            final Location triggeringLocation = geofencingEvent.getTriggeringLocation();
 
-            pushGeofenceEvents(triggeringGeofences, triggeringLocation, geofenceTransition);
+            // send geofence event through queue to avoid loss of old geofence data
+            // for example. while searching triggered geofence in file, it may be overwritten by new fences received from server
+            CTGeofenceTaskManager.getInstance().postAsyncSafely("PushGeofenceEvent",
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            pushGeofenceEvents(triggeringGeofences, triggeringLocation, geofenceTransition);
+                        }
+                    });
 
         } else {
             // Log the error.
@@ -67,11 +75,17 @@ public class CTGeofenceService extends JobIntentService {
         }
     }
 
+
+    /**
+     *  Push geofence event to CT SDK. If multiple geofences are triggered then send it sequentially
+     * @param triggeringGeofences
+     * @param triggeringLocation
+     * @param geofenceTransition
+     */
     private void pushGeofenceEvents(List<Geofence> triggeringGeofences, Location triggeringLocation,
                                     int geofenceTransition) {
 
         //TODO: Finalize contract for geofence trigger event
-        //TODO: what if triggered event read fence data from file and before that new data gets written due to location updates
         if (triggeringGeofences == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "fetched triggered geofence list is null");
@@ -123,9 +137,13 @@ public class CTGeofenceService extends JobIntentService {
             }
         }
 
+        if (!isTriggeredGeofenceFound) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Triggered geofences not found in file! dropping this geofence event");
+        }
 
         // due to some reasons if triggered fences is not found then push below response
-        if (!isTriggeredGeofenceFound) {
+        /*if (!isTriggeredGeofenceFound) {
 
             JSONObject jsonObject = new JSONObject();
             JSONArray jsonArray = new JSONArray();
@@ -152,7 +170,7 @@ public class CTGeofenceService extends JobIntentService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
 
     }
 

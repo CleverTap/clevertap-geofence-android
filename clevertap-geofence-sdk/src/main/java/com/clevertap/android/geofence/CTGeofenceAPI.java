@@ -4,21 +4,17 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 
+import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.interfaces.CTGeofenceCallback;
 import com.clevertap.android.geofence.interfaces.CTGeofenceInterface;
-import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
+import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.interfaces.CTLocatioCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
-import com.clevertap.android.geofence.model.CTGeofence;
 import com.clevertap.android.geofence.model.CTGeofenceSettings;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-
 import static android.app.PendingIntent.FLAG_NO_CREATE;
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 public class CTGeofenceAPI implements CTGeofenceCallback {
 
@@ -28,9 +24,11 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     private static Logger logger;
     private final CTLocationAdapter ctLocationAdapter;
     private final CTGeofenceAdapter ctGeofenceAdapter;
+
     private CTGeofenceSettings ctGeofenceSettings;
     private CTGeofenceInterface ctGeofenceInterface;
     private boolean isActivated;
+    private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
 
     private CTGeofenceAPI(Context context) {
         this.context = context;
@@ -38,7 +36,6 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         ctLocationAdapter = CTLocationFactory.createLocationAdapter(context);
         ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(context);
     }
-
 
     public static CTGeofenceAPI getInstance(Context context) {
         if (ctGeofenceAPI == null) {
@@ -70,8 +67,18 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     }
 
     /**
-     * Initializes location update receivers and geofence monitoring by
-     * reading config settings if provided or will use default settings
+     * Listener for Geofence SDK initialize
+     *
+     * @param onGeofenceApiInitializedListener
+     */
+    public void setOnGeofenceApiInitializedListener(OnGeofenceApiInitializedListener onGeofenceApiInitializedListener) {
+        this.onGeofenceApiInitializedListener = onGeofenceApiInitializedListener;
+    }
+
+    /**
+     * Initializes location update receivers and geofence monitoring on background thread by
+     * reading config settings if provided or will use default settings.
+     * Should be used by CT SDK only
      */
     public void activate() {
 
@@ -95,56 +102,20 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         ctGeofenceInterface.setGeoFenceCallback(this);
         logger.debug(GEOFENCE_LOG_TAG, "geofence callback registered");
 
-        PendingIntent locationPendingIntent = PendingIntentFactory.getPendingIntent(context,
-                PendingIntentFactory.PENDING_INTENT_LOCATION, FLAG_NO_CREATE);
+        LocationUpdateTask locationUpdateTask = new LocationUpdateTask(context);
+        locationUpdateTask.setOnCompleteListener(new CTGeofenceTask.OnCompleteListener() {
+            @Override
+            public void onComplete() {
+                isActivated = true;
 
-        int lastAccuracy = -1;
-        int lastFetchMode = -1;
-        int currentAccuracy = ctGeofenceSettings.getLocationAccuracy();
-        int currentFetchMode = ctGeofenceSettings.getLocationFetchMode();
-
-        // read settings from file
-        String settingsString = FileUtils.readFromFile(context, CTGeofenceConstants.SETTINGS_FULL_PATH);
-        if (settingsString != null && !settingsString.trim().equals("")) {
-            try {
-                JSONObject jsonObject = new JSONObject(settingsString);
-                lastAccuracy = jsonObject.getInt(CTGeofenceConstants.KEY_LAST_ACCURACY);
-                lastFetchMode = jsonObject.getInt(CTGeofenceConstants.KEY_LAST_FETCH_MODE);
-
-            } catch (Exception e) {
-                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                        "Failed to read geofence settings from file");
+                if (onGeofenceApiInitializedListener != null) {
+                    onGeofenceApiInitializedListener.OnGeofenceApiInitialized();
+                }
             }
-        }
+        });
 
-
-        // if background location disabled and if location update request is already registered then remove it
-        if (!ctGeofenceSettings.isBackgroundLocationUpdatesEnabled() && locationPendingIntent != null) {
-
-            ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
-
-        } else if (ctGeofenceSettings.isBackgroundLocationUpdatesEnabled()
-                && (locationPendingIntent == null
-                || (currentAccuracy != lastAccuracy && currentFetchMode== CTGeofenceSettings.FETCH_AUTO)
-                || currentFetchMode != lastFetchMode)) {
-
-            // if background location enabled and if location update request is not already registered
-            // or there is change in accuracy or fetch mode settings then request location updates
-            ctLocationAdapter.requestLocationUpdates();
-        }
-
-        // write new settings to file
-        JSONObject settings = new JSONObject();
-        try {
-            settings.put(CTGeofenceConstants.KEY_LAST_ACCURACY, currentAccuracy);
-            FileUtils.writeJsonToFile(context, CTGeofenceConstants.CACHED_DIR_NAME,
-                    CTGeofenceConstants.SETTINGS_FILE_NAME, settings);
-        } catch (JSONException e) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Failed to write geofence settings to file");
-        }
-
-        isActivated = true;
+        CTGeofenceTaskManager.getInstance().postAsyncSafely("IntitializeLocationUpdates",
+                locationUpdateTask);
 
     }
 
@@ -153,21 +124,26 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      */
     public void deactivate() {
 
-        /**
-         * TODO: deactivate fence and location receivers and clean up resources
-         */
 
-        // stop geofence monitoring
-        PendingIntent geofencePendingIntent = PendingIntentFactory.getPendingIntent(context,
-                PendingIntentFactory.PENDING_INTENT_GEOFENCE, FLAG_NO_CREATE);
-        ctGeofenceAdapter.stopGeofenceMonitoring(geofencePendingIntent);
+        //  TODO: clean up resources
 
-        // stop location updates
-        PendingIntent locationPendingIntent = PendingIntentFactory.getPendingIntent(context,
-                PendingIntentFactory.PENDING_INTENT_LOCATION, FLAG_NO_CREATE);
-        ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
 
-        isActivated = false;
+        CTGeofenceTaskManager.getInstance().postAsyncSafely("DeactivateApi", new Runnable() {
+            @Override
+            public void run() {
+                // stop geofence monitoring
+                PendingIntent geofencePendingIntent = PendingIntentFactory.getPendingIntent(context,
+                        PendingIntentFactory.PENDING_INTENT_GEOFENCE, FLAG_NO_CREATE);
+                ctGeofenceAdapter.stopGeofenceMonitoring(geofencePendingIntent);
+
+                // stop location updates
+                PendingIntent locationPendingIntent = PendingIntentFactory.getPendingIntent(context,
+                        PendingIntentFactory.PENDING_INTENT_LOCATION, FLAG_NO_CREATE);
+                ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
+
+                isActivated = false;
+            }
+        });
 
     }
 
@@ -195,41 +171,26 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     }
 
     @Override
-    public void onSuccess(JSONObject fenceList) {
-        //thread safe
-        if (fenceList != null) {
+    public void onSuccess(final JSONObject fenceList) {
 
-            //remove previously added geofences
-            String oldFenceListString = FileUtils.readFromFile(context, CTGeofenceConstants.CACHED_FULL_PATH);
-            if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
-
-                List<String> ctOldGeofenceList = null;
-                try {
-                    ctOldGeofenceList = CTGeofence.toIds(new JSONObject(oldFenceListString));
-                } catch (Exception e) {
-                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                            "Failed to read previously registered geofences from file");
-                    e.printStackTrace();
-                }
-
-                ctGeofenceAdapter.removeAllGeofence(ctOldGeofenceList);
-            }
-
-
-            //add new geofences
-            FileUtils.writeJsonToFile(context, CTGeofenceConstants.CACHED_DIR_NAME,
-                    CTGeofenceConstants.CACHED_FILE_NAME, fenceList);
-            List<CTGeofence> ctGeofenceList = CTGeofence.from(fenceList);
-
-            ctGeofenceAdapter.addAllGeofence(ctGeofenceList);
-
+        if (fenceList == null) {
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Geofence response is null! dropping further processing");
+            return;
         }
+
+        GeofenceUpdateTask geofenceUpdateTask = new GeofenceUpdateTask(context, fenceList);
+
+        CTGeofenceTaskManager.getInstance().postAsyncSafely("ProcessGeofenceUpdates",
+                geofenceUpdateTask);
+
     }
 
     @Override
     public void onFailure(Throwable error) {
 
     }
+
 
     CTGeofenceAdapter getCtGeofenceAdapter() {
         return ctGeofenceAdapter;
@@ -249,5 +210,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
     public static Logger getLogger() {
         return logger;
+    }
+
+    public interface OnGeofenceApiInitializedListener {
+        void OnGeofenceApiInitialized();
     }
 }
