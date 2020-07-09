@@ -69,6 +69,9 @@ class LocationUpdateTask implements CTGeofenceTask {
             // if background location enabled and if location update request is not already registered
             // or there is change in accuracy or fetch mode settings then request location updates
             ctLocationAdapter.requestLocationUpdates();
+        } else {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Dropping duplicate location update request");
         }
 
         // write new settings to file

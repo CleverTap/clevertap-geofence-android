@@ -8,6 +8,8 @@ import androidx.core.app.JobIntentService;
 
 import com.google.android.gms.location.LocationResult;
 
+import static com.clevertap.android.geofence.CTGeofenceAPI.GEOFENCE_LOG_TAG;
+
 public class CTLocationUpdateService extends JobIntentService {
 
     /**
@@ -26,8 +28,31 @@ public class CTLocationUpdateService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
-                .setLocationForGeofences(LocationResult.extractResult(intent).getLastLocation());
+
+        int jobType = intent.getIntExtra(CTGeofenceConstants.EXTRA_JOB_SERVICE_TYPE, -1);
+
+        if (jobType == CTGeofenceConstants.JOB_TYPE_DEVICE_BOOT) {
+
+            CTGeofenceAPI.getLogger().debug(GEOFENCE_LOG_TAG,"registering geofences after device reboot");
+
+            // pass null GeofenceList to register old fences stored in file
+            GeofenceUpdateTask geofenceUpdateTask = new GeofenceUpdateTask(getApplicationContext(), null);
+
+            CTGeofenceTaskManager.getInstance().postAsyncSafely("ProcessGeofenceUpdatesOnBoot",
+                    geofenceUpdateTask);
+
+            CTGeofenceAPI.getLogger().debug(GEOFENCE_LOG_TAG, "registering location updates after device reboot");
+
+            LocationUpdateTask locationUpdateTask = new LocationUpdateTask(getApplicationContext());
+
+            CTGeofenceTaskManager.getInstance().postAsyncSafely("IntitializeLocationUpdatesOnBoot",
+                    locationUpdateTask);
+
+        } else {
+            CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
+                    .setLocationForGeofences(LocationResult.extractResult(intent).getLastLocation());
+        }
+
     }
 
     @Override
