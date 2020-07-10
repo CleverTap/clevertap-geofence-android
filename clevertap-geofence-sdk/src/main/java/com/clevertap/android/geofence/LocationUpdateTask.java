@@ -42,7 +42,8 @@ class LocationUpdateTask implements CTGeofenceTask {
         int currentFetchMode = ctGeofenceSettings.getLocationFetchMode();
 
         // read settings from file
-        String settingsString = FileUtils.readFromFile(context, CTGeofenceConstants.SETTINGS_FULL_PATH);
+        String settingsString = FileUtils.readFromFile(context,
+                FileUtils.getCachedFullPath(context,CTGeofenceConstants.SETTINGS_FILE_NAME));
         if (settingsString != null && !settingsString.trim().equals("")) {
             try {
                 JSONObject jsonObject = new JSONObject(settingsString);
@@ -79,7 +80,7 @@ class LocationUpdateTask implements CTGeofenceTask {
         try {
             settings.put(CTGeofenceConstants.KEY_LAST_ACCURACY, currentAccuracy);
             settings.put(CTGeofenceConstants.KEY_LAST_FETCH_MODE, currentFetchMode);
-            FileUtils.writeJsonToFile(context, CTGeofenceConstants.CACHED_DIR_NAME,
+            FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
                     CTGeofenceConstants.SETTINGS_FILE_NAME, settings);
         } catch (JSONException e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,

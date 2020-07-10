@@ -97,7 +97,8 @@ public class CTGeofenceService extends JobIntentService {
 
 
         // Search triggered geofences in file by id and send stored geofence object to CT SDK
-        String oldFenceListString = FileUtils.readFromFile(getApplicationContext(), CTGeofenceConstants.CACHED_FULL_PATH);
+        String oldFenceListString = FileUtils.readFromFile(getApplicationContext(),
+                FileUtils.getCachedFullPath(getApplicationContext(),CTGeofenceConstants.CACHED_FILE_NAME));
         if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
 
             JSONObject jsonObject;

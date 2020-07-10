@@ -60,4 +60,8 @@ class Utils {
 
         return isFusedLocationDependencyAvailable;
     }
+
+    static String emptyIfNull(String str) {
+        return str == null ? "" : str;
+    }
 }

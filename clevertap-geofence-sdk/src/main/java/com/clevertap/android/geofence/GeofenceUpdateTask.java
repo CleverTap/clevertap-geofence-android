@@ -30,7 +30,8 @@ class GeofenceUpdateTask implements CTGeofenceTask {
     @Override
     public void execute() {
 
-        String oldFenceListString = FileUtils.readFromFile(context, CTGeofenceConstants.CACHED_FULL_PATH);
+        String oldFenceListString = FileUtils.readFromFile(context,
+                FileUtils.getCachedFullPath(context,CTGeofenceConstants.CACHED_FILE_NAME));
 
         if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
 
@@ -76,7 +77,7 @@ class GeofenceUpdateTask implements CTGeofenceTask {
         }
 
         //add new geofences, this will overwrite old ones
-        FileUtils.writeJsonToFile(context, CTGeofenceConstants.CACHED_DIR_NAME,
+        FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
                 CTGeofenceConstants.CACHED_FILE_NAME, fenceList);
         List<CTGeofence> ctGeofenceList = CTGeofence.from(fenceList);
 

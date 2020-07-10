@@ -30,7 +30,6 @@ class BackgroundLocationWork extends ListenableWorker {
                 CTLocatioCallback ctLocatioCallback = new CTLocatioCallback() {
                     @Override
                     public void onLocationComplete(Location location) {
-                        //TODO: should we pass null location to CT SDK
                         CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
                                 .setLocationForGeofences(location);
 

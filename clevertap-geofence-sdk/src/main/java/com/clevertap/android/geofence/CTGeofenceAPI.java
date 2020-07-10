@@ -29,6 +29,8 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     private CTGeofenceInterface ctGeofenceInterface;
     private boolean isActivated;
     private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
+    private String accountId;
+    private String guid;
 
     private CTGeofenceAPI(Context context) {
         this.context = context.getApplicationContext();
@@ -78,6 +80,38 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      */
     public void setOnGeofenceApiInitializedListener(OnGeofenceApiInitializedListener onGeofenceApiInitializedListener) {
         this.onGeofenceApiInitializedListener = onGeofenceApiInitializedListener;
+    }
+
+    /**
+     * set clevertap account id, should be used by CT SDK only
+     *
+     * @param accountId clevertap account id
+     */
+    public void setAccountId(String accountId){
+
+        if (accountId==null) {
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Account Id is null");
+            return;
+        }
+
+        this.accountId=accountId;
+    }
+
+    /**
+     * set guid, should be used by CT SDK only
+     *
+     * @param guid
+     */
+    public void setGUID(String guid){
+
+        if (guid==null) {
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "guid is null");
+            return;
+        }
+
+        this.guid=guid;
     }
 
     /**
@@ -219,5 +253,13 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
     public interface OnGeofenceApiInitializedListener {
         void OnGeofenceApiInitialized();
+    }
+
+    String getAccountId() {
+        return Utils.emptyIfNull(accountId);
+    }
+
+    String getGuid() {
+        return Utils.emptyIfNull(guid);
     }
 }

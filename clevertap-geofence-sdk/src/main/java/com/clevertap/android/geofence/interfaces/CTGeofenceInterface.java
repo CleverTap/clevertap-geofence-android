@@ -11,6 +11,4 @@ public interface CTGeofenceInterface {
     void pushGeoFenceExitedEvent(JSONObject object);
     void setGeoFenceCallback(CTGeofenceCallback callback);
 
-
-
 }

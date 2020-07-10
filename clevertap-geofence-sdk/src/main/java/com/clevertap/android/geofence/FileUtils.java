@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 
 public class FileUtils {
 
-    public static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
+    static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
         try {
             if (jsonObject == null || TextUtils.isEmpty(dirName) || TextUtils.isEmpty(fileName))
                 return;
@@ -35,7 +35,7 @@ public class FileUtils {
         }
     }
 
-    public static String readFromFile(Context context, String fileNameWithPath) {
+    static String readFromFile(Context context, String fileNameWithPath) {
 
         String content = "";
         //Make sure to use a try-catch statement to catch any errors
@@ -67,7 +67,7 @@ public class FileUtils {
         return content;
     }
 
-    public static void deleteDirectory(Context context, String dirName) {
+    static void deleteDirectory(Context context, String dirName) {
         if (TextUtils.isEmpty(dirName) || context == null)
             return;
         try {
@@ -84,7 +84,7 @@ public class FileUtils {
         }
     }
 
-    public static void deleteFile(Context context, String fileName) throws Exception {
+    static void deleteFile(Context context, String fileName) {
         if (TextUtils.isEmpty(fileName) || context == null)
             return;
         try {
@@ -100,5 +100,14 @@ public class FileUtils {
             e.printStackTrace();
             CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + fileName + " Error:" + e.getLocalizedMessage());
         }
+    }
+
+    static String getCachedDirName(Context context) {
+        return CTGeofenceConstants.CACHED_DIR_NAME + "_" + CTGeofenceAPI.getInstance(context).getAccountId()
+                + "_" + CTGeofenceAPI.getInstance(context).getGuid();
+    }
+
+    static String getCachedFullPath(Context context, String fileName) {
+        return getCachedDirName(context) + "/" + fileName;
     }
 }
