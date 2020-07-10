@@ -145,7 +145,6 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         locationUpdateTask.setOnCompleteListener(new CTGeofenceTask.OnCompleteListener() {
             @Override
             public void onComplete() {
-                isActivated = true;
 
                 if (onGeofenceApiInitializedListener != null) {
                     onGeofenceApiInitializedListener.OnGeofenceApiInitialized();
@@ -156,6 +155,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         CTGeofenceTaskManager.getInstance().postAsyncSafely("IntitializeLocationUpdates",
                 locationUpdateTask);
 
+        isActivated = true;
     }
 
     /**
@@ -191,17 +191,27 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      */
     public void triggerLocation() {
 
+        logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "triggerLocation() called");
+
         if (!isActivated) {
             throw new IllegalStateException("activate() must be called before triggerLocation()");
         }
 
-        ctLocationAdapter.getLastLocation(new CTLocatioCallback() {
-            @Override
-            public void onLocationComplete(Location location) {
-                //get's called on main thread
-                ctGeofenceInterface.setLocationForGeofences(location);
-            }
-        });
+        CTGeofenceTaskManager.getInstance().postAsyncSafely("TriggerLocation",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        ctLocationAdapter.getLastLocation(new CTLocatioCallback() {
+                            @Override
+                            public void onLocationComplete(Location location) {
+                                //get's called on bg thread
+                                ctGeofenceInterface.setLocationForGeofences(location);
+                            }
+                        });
+                    }
+                });
+
 
     }
 

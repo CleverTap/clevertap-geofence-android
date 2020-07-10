@@ -117,25 +117,49 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
 
     }
 
+    @WorkerThread
     @Override
     public void getLastLocation(final CTLocatioCallback callback) {
         //thread safe
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "getLastLocation() called");
 
         if (callback == null) {
             throw new IllegalArgumentException("location callback can not be null");
         }
 
+        try {
+            Task<Location> lastLocation = fusedProviderClient.getLastLocation();
 
-        fusedProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                // get's called on main thread
-                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location fetch completed");
-                Location lastLocation = task.getResult();
-                callback.onLocationComplete(lastLocation);
+            // blocking task
+            Location location = Tasks.await(lastLocation);
 
-            }
-        });
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location fetch completed");
+            callback.onLocationComplete(location);
+
+            /*lastLocation.addOnCompleteListener(new OnCompleteListener<Location>() {
+                @Override
+                public void onComplete(@NonNull Task<Location> task) {
+                    try {
+                        // get's called on main thread
+                        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location fetch completed");
+                        Location lastLocation = task.getResult();
+                        callback.onLocationComplete(lastLocation);
+
+                    } catch (Exception e) {
+                        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                "Failed to request last location");
+                        e.printStackTrace();
+                    }
+
+                }
+            });*/
+        } catch (Exception e) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Failed to request last location");
+            e.printStackTrace();
+        }
 
     }
 

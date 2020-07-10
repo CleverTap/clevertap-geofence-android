@@ -9,8 +9,12 @@ import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
     static CTLocationAdapter createLocationAdapter(Context context){
 
         if (Utils.isFusedLocationApiDependencyAvailable()){
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "FusedLocationApi dependency is available");
             return new GoogleLocationAdapter(context.getApplicationContext());
         }else {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "FusedLocationApi dependency is not available");
             return new AndroidLocationAdapter(context.getApplicationContext());
         }
     }
