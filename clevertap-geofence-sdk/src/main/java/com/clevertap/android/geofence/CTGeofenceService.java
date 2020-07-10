@@ -29,7 +29,7 @@ public class CTGeofenceService extends JobIntentService {
      * Convenience method for enqueuing work in to this service.
      */
     static void enqueueWork(Context context, Intent work) {
-        enqueueWork(context, CTGeofenceService.class, JOB_ID, work);
+        enqueueWork(context.getApplicationContext(), CTGeofenceService.class, JOB_ID, work);
     }
 
 

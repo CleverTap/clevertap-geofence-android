@@ -30,8 +30,8 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
     private PendingIntent geofencePendingIntent;
 
     GoogleGeofenceAdapter(Context context) {
-        this.context = context;
-        geofencingClient = LocationServices.getGeofencingClient(context);
+        this.context = context.getApplicationContext();
+        geofencingClient = LocationServices.getGeofencingClient(this.context);
     }
 
     @Override

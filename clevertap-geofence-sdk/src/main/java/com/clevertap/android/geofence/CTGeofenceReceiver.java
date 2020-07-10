@@ -11,7 +11,7 @@ public class CTGeofenceReceiver extends BroadcastReceiver {
         try {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Geofence receiver called");
-            CTGeofenceService.enqueueWork(context, intent);
+            CTGeofenceService.enqueueWork(context.getApplicationContext(), intent);
         }
         catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,

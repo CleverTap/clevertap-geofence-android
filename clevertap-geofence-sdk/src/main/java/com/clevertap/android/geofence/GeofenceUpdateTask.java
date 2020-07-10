@@ -22,9 +22,9 @@ class GeofenceUpdateTask implements CTGeofenceTask {
     private OnCompleteListener onCompleteListener;
 
     GeofenceUpdateTask(Context context, JSONObject fenceList) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.fenceList = fenceList;
-        ctGeofenceAdapter = CTGeofenceAPI.getInstance(context).getCtGeofenceAdapter();
+        ctGeofenceAdapter = CTGeofenceAPI.getInstance(this.context).getCtGeofenceAdapter();
     }
 
     @Override

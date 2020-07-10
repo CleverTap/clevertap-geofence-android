@@ -24,9 +24,9 @@ class LocationUpdateTask implements CTGeofenceTask {
     private OnCompleteListener onCompleteListener;
 
     LocationUpdateTask(Context context) {
-        this.context = context;
-        ctGeofenceSettings = CTGeofenceAPI.getInstance(context).getGeofenceSettings();
-        ctLocationAdapter = CTGeofenceAPI.getInstance(context).getCtLocationAdapter();
+        this.context = context.getApplicationContext();
+        ctGeofenceSettings = CTGeofenceAPI.getInstance(this.context).getGeofenceSettings();
+        ctLocationAdapter = CTGeofenceAPI.getInstance(this.context).getCtLocationAdapter();
     }
 
     @Override

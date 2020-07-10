@@ -17,20 +17,20 @@ class PendingIntentFactory {
 
         switch (pendingIntentType) {
             case PENDING_INTENT_LOCATION:
-                intent = new Intent(context, CTLocationUpdateReceiver.class);
+                intent = new Intent(context.getApplicationContext(), CTLocationUpdateReceiver.class);
                 intent.setAction(CTGeofenceConstants.ACTION_LOCATION_RECEIVER);
-                broadcastSenderRequestCode = 102;
+                broadcastSenderRequestCode = 10100111;
                 break;
             case PENDING_INTENT_GEOFENCE:
-                intent = new Intent(context, CTGeofenceReceiver.class);
+                intent = new Intent(context.getApplicationContext(), CTGeofenceReceiver.class);
                 intent.setAction(CTGeofenceConstants.ACTION_GEOFENCE_RECEIVER);
-                broadcastSenderRequestCode = 100;
+                broadcastSenderRequestCode = 1001001;
                 break;
             default:
                 throw new IllegalArgumentException("invalid pendingIntentType");
         }
 
-        return PendingIntent.getBroadcast(context, broadcastSenderRequestCode, intent, flags);
+        return PendingIntent.getBroadcast(context.getApplicationContext(), broadcastSenderRequestCode, intent, flags);
 
     }
 

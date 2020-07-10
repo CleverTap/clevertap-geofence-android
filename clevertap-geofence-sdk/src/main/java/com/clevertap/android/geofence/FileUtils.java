@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 
 public class FileUtils {
 
-    synchronized public static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
+    public static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
         try {
             if (jsonObject == null || TextUtils.isEmpty(dirName) || TextUtils.isEmpty(fileName))
                 return;
@@ -35,7 +35,7 @@ public class FileUtils {
         }
     }
 
-    synchronized public static String readFromFile(Context context, String fileNameWithPath){
+    public static String readFromFile(Context context, String fileNameWithPath) {
 
         String content = "";
         //Make sure to use a try-catch statement to catch any errors

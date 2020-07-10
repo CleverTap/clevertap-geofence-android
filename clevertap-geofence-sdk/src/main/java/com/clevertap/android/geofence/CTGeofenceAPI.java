@@ -31,10 +31,10 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
 
     private CTGeofenceAPI(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         logger = new Logger(Logger.LogLevel.DEBUG);
-        ctLocationAdapter = CTLocationFactory.createLocationAdapter(context);
-        ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(context);
+        ctLocationAdapter = CTLocationFactory.createLocationAdapter(this.context);
+        ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(this.context);
     }
 
     public static CTGeofenceAPI getInstance(Context context) {
@@ -54,6 +54,11 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      * @param ctGeofenceSettings
      */
     public void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
+
+        if (this.ctGeofenceSettings != null) {
+            throw new IllegalStateException("Settings already configured.");
+        }
+
         this.ctGeofenceSettings = ctGeofenceSettings;
     }
 

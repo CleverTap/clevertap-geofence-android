@@ -9,9 +9,9 @@ import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
     static CTLocationAdapter createLocationAdapter(Context context){
 
         if (Utils.isFusedLocationApiDependencyAvailable()){
-            return new GoogleLocationAdapter(context);
+            return new GoogleLocationAdapter(context.getApplicationContext());
         }else {
-            return new AndroidLocationAdapter(context);
+            return new AndroidLocationAdapter(context.getApplicationContext());
         }
     }
 }
