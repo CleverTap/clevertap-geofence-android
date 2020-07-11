@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+@SuppressWarnings("WeakerAccess")
 public class FileUtils {
 
     static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
@@ -57,7 +58,7 @@ public class FileUtils {
             //Also create an empty String
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String receiveString = "";
+            String receiveString;
             //Use a while loop to append the lines from the Buffered reader
             while ((receiveString = bufferedReader.readLine()) != null) {
                 stringBuilder.append(receiveString);
@@ -72,6 +73,8 @@ public class FileUtils {
         return content;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    //TODO Do we need this?
     static void deleteDirectory(Context context, String dirName) {
         if (TextUtils.isEmpty(dirName) || context == null)
             return;
@@ -79,8 +82,10 @@ public class FileUtils {
             File file = new File(context.getFilesDir(), dirName);
             if (file.exists() && file.isDirectory()) {
                 String[] children = file.list();
-                for (String child : children) {
-                    new File(file, child).delete();
+                if (children != null) {
+                    for (String child : children) {
+                        new File(file, child).delete();
+                    }
                 }
             }
         } catch (Exception e) {
@@ -89,6 +94,7 @@ public class FileUtils {
         }
     }
 
+    //TODO Do we need this?
     static void deleteFile(Context context, String fileName) {
         if (TextUtils.isEmpty(fileName) || context == null)
             return;

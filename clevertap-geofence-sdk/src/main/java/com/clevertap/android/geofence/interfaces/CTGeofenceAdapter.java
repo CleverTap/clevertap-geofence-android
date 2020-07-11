@@ -15,5 +15,4 @@ public interface CTGeofenceAdapter {
    void removeAllGeofence(List<String> fenceIdList, OnSuccessListener onSuccessListener);
    void stopGeofenceMonitoring(PendingIntent pendingIntent);
 
-
 }

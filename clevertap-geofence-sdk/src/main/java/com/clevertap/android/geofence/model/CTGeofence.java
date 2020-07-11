@@ -13,7 +13,6 @@ import java.util.List;
 
 public class CTGeofence {
 
-
     private final int transitionType;
     private final String id;
     private final float latitude;
@@ -108,29 +107,6 @@ public class CTGeofence {
         }
 
         return geofenceList;
-
-    }
-
-    // TODO: Does it makes sense to put this method here or move it somewhere else
-    public static List<String> toIds(JSONObject jsonObject) {
-
-        ArrayList<String> geofenceIdList = new ArrayList<>();
-
-        try {
-            JSONArray array = jsonObject.getJSONArray("geofences");
-
-            for (int i = 0; i < array.length(); i++) {
-
-                JSONObject object = array.getJSONObject(i);
-                geofenceIdList.add(object.getString(CTGeofenceConstants.KEY_ID));
-            }
-        } catch (JSONException e) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Could not convert JSON to GeofenceIdList - " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return geofenceIdList;
 
     }
 }

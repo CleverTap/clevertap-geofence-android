@@ -39,7 +39,7 @@ class GeofenceUpdateTask implements CTGeofenceTask {
             JSONObject ctOldGeofenceObject = null;
             try {
                 ctOldGeofenceObject = new JSONObject(oldFenceListString);
-                ctOldGeofenceIdList = CTGeofence.toIds(ctOldGeofenceObject);
+                ctOldGeofenceIdList = Utils.jsonToGeoFenceList(ctOldGeofenceObject);
             } catch (Exception e) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Failed to read previously registered geofences from file");
@@ -47,7 +47,6 @@ class GeofenceUpdateTask implements CTGeofenceTask {
             }
 
             if (fenceList != null) {
-
                 //remove previously added geofences
                 ctGeofenceAdapter.removeAllGeofence(ctOldGeofenceIdList, new OnSuccessListener() {
                     @Override
@@ -56,14 +55,11 @@ class GeofenceUpdateTask implements CTGeofenceTask {
                         addGeofences(fenceList);
                     }
                 });
-
             } else {
                 // In case device reboot, boot receiver will pass null fenceList which simply means
                 // read old fences from file and add back to Geofence Client
                 addGeofences(ctOldGeofenceObject);
             }
-
-
         } else {
             // add new fences
             addGeofences(fenceList);
@@ -75,7 +71,7 @@ class GeofenceUpdateTask implements CTGeofenceTask {
         if (fenceList == null) {
             return;
         }
-
+        //TODO add debug logging here
         //add new geofences, this will overwrite old ones
         FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
                 CTGeofenceConstants.CACHED_FILE_NAME, fenceList);

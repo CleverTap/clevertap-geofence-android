@@ -40,6 +40,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(this.context);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static CTGeofenceAPI getInstance(Context context) {
         if (ctGeofenceAPI == null) {
             synchronized (CTGeofenceAPI.class) {
@@ -54,8 +55,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     /**
      * Set geofence API configuration settings, should be used by CT SDK only
      *
-     * @param ctGeofenceSettings
+     * @param ctGeofenceSettings - Object of {@link CTGeofenceSettings}
      */
+    @SuppressWarnings("unused")
     public void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
 
         if (this.ctGeofenceSettings != null) {
@@ -68,8 +70,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     /**
      * register an implementation of CTGeofenceInterface, should be used by CT SDK only
      *
-     * @param ctGeofenceInterface
+     * @param ctGeofenceInterface - Object of {@link CTGeofenceInterface}
      */
+    @SuppressWarnings("unused")
     public void setGeofenceInterface(CTGeofenceInterface ctGeofenceInterface) {
         this.ctGeofenceInterface = ctGeofenceInterface;
     }
@@ -77,8 +80,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     /**
      * Listener for Geofence SDK initialize
      *
-     * @param onGeofenceApiInitializedListener
+     * @param onGeofenceApiInitializedListener - Object of {@link OnGeofenceApiInitializedListener}
      */
+    @SuppressWarnings("unused")
     public void setOnGeofenceApiInitializedListener(OnGeofenceApiInitializedListener onGeofenceApiInitializedListener) {
         this.onGeofenceApiInitializedListener = onGeofenceApiInitializedListener;
     }
@@ -88,6 +92,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      *
      * @param accountId clevertap account id
      */
+    @SuppressWarnings("unused")
     public void setAccountId(String accountId) {
 
         if (accountId == null) {
@@ -102,8 +107,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     /**
      * set guid, should be used by CT SDK only
      *
-     * @param guid
+     * @param guid - String
      */
+    @SuppressWarnings("unused")
     public void setGUID(String guid) {
 
         if (guid == null) {
@@ -120,6 +126,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      * reading config settings if provided or will use default settings.
      * Should be used by CT SDK only
      */
+    @SuppressWarnings("unused")
     public void activate() {
 
         if (isActivated) {
@@ -146,11 +153,12 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         initBackgroundLocationUpdates();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void initBackgroundLocationUpdates() {
 
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "We don't have ACCESS_FINE_LOCATION permission! dropping initBackgroundLocationUpdates() call");
+                    "We don't have ACCESS_FINE_LOCATION permission! Dropping initBackgroundLocationUpdates() call");
             return;
         }
 
@@ -159,6 +167,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
         if (!isActivated) {
             throw new IllegalStateException("activate() must be called before requestBackgroundLocationUpdates()");
+            //TODO: app is not calling activate() in any case, so this logging needs to change
         }
 
         LocationUpdateTask locationUpdateTask = new LocationUpdateTask(context);
@@ -179,12 +188,10 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     /**
      * unregisters geofences, location updates and cleanup all resources
      */
+    @SuppressWarnings("unused")
     public void deactivate() {
 
-
         //  TODO: clean up resources
-
-
         CTGeofenceTaskManager.getInstance().postAsyncSafely("DeactivateApi", new Runnable() {
             @Override
             public void run() {
@@ -207,6 +214,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     /**
      * fetches last location from FusedLocationAPI and delivers the result on main thread
      */
+    @SuppressWarnings("unused")
     public void triggerLocation() {
 
         logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -214,12 +222,13 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "We don't have ACCESS_FINE_LOCATION permission! dropping triggerLocation() call");
+                    "We don't have ACCESS_FINE_LOCATION permission! Dropping triggerLocation() call");
             return;
         }
 
         if (!isActivated) {
             throw new IllegalStateException("activate() must be called before triggerLocation()");
+            //TODO: app is not calling activate() in any case, so this logging needs to change
         }
 
         CTGeofenceTaskManager.getInstance().postAsyncSafely("TriggerLocation",
@@ -283,6 +292,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         return ctGeofenceInterface;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public CTGeofenceSettings getGeofenceSettings() {
         return ctGeofenceSettings;
     }

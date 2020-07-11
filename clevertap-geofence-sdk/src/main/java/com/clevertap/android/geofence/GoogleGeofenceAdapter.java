@@ -3,7 +3,6 @@ package com.clevertap.android.geofence;
 import android.app.PendingIntent;
 import android.content.Context;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
@@ -12,7 +11,6 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -27,7 +25,6 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
     private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = Geofence.NEVER_EXPIRE;
     private final Context context;
     private final GeofencingClient geofencingClient;
-    private PendingIntent geofencePendingIntent;
 
     GoogleGeofenceAdapter(Context context) {
         this.context = context.getApplicationContext();
@@ -36,9 +33,10 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     @Override
     public void addGeofence(CTGeofence fence) {
-
+        //TODO Do we need this?
     }
 
+    @SuppressWarnings("unchecked")
     @WorkerThread
     @Override
     public void addAllGeofence(List<CTGeofence> fenceList, final OnSuccessListener onSuccessListener) {
@@ -95,6 +93,7 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     }
 
+    @SuppressWarnings("unchecked")
     @WorkerThread
     @Override
     public void removeAllGeofence(List<String> fenceIdList, final OnSuccessListener onSuccessListener) {

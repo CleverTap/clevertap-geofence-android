@@ -25,6 +25,7 @@ public class CTGeofenceSettings {
         logLevel = builder.logLevel;
     }
 
+    //TODO add comments for each method
     public static final class Builder {
 
         private boolean backgroundLocationUpdates = true;

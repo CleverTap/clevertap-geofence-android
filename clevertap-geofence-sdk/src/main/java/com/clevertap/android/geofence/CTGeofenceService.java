@@ -12,7 +12,6 @@ import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class CTGeofenceService extends JobIntentService {
      * Unique job ID for this service, must be the same value for all work
      * enqueued for the same class.
      */
-    static final int JOB_ID = 1010;
+    static final int JOB_ID = 1010; //TODO use accountId.hashCode + some fixed number as JobId
 
     /**
      * Convenience method for enqueuing work in to this service.
@@ -38,6 +37,7 @@ public class CTGeofenceService extends JobIntentService {
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 
+        //TODO Do we need null check?
         if (geofencingEvent == null || geofencingEvent.hasError()) {
             String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -78,9 +78,9 @@ public class CTGeofenceService extends JobIntentService {
 
     /**
      *  Push geofence event to CT SDK. If multiple geofences are triggered then send it sequentially
-     * @param triggeringGeofences
-     * @param triggeringLocation
-     * @param geofenceTransition
+     * @param triggeringGeofences - List of {@link Geofence}
+     * @param triggeringLocation - {@link Location} object
+     * @param geofenceTransition - int value of geofence transition event
      */
     private void pushGeofenceEvents(List<Geofence> triggeringGeofences, Location triggeringLocation,
                                     int geofenceTransition) {
@@ -127,7 +127,7 @@ public class CTGeofenceService extends JobIntentService {
                             }
 
                             break;
-
+                            //TODO add some verbose logging here to help us debug prod issues
                         }
                     }
                 }

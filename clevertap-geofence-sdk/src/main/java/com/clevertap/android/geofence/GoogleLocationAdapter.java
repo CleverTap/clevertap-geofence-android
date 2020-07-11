@@ -37,7 +37,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     private boolean backgroundLocationUpdatesEnabled;
     private int locationFetchMode;
     private int locationAccuracy = LocationRequest.PRIORITY_HIGH_ACCURACY;
-    private boolean isPlayServicesAvailable;
+    private boolean isPlayServicesAvailable; //TODO do we need this? If yes, do we need it global?
 
     GoogleLocationAdapter(Context context) {
         this.context = context.getApplicationContext();
@@ -63,7 +63,6 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         }
 
         if (locationFetchMode == CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC) {
-
 
             // should get same pendingIntent on each app launch or else instance will leak
             PendingIntent pendingIntent = PendingIntentFactory.getPendingIntent(context,

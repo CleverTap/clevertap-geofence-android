@@ -9,7 +9,8 @@ public final class Logger {
     public enum LogLevel {
         OFF(-1),
         INFO(0),
-        DEBUG(2);
+        DEBUG(2),
+        VERBOSE(3);
 
         private final int value;
 
@@ -26,6 +27,7 @@ public final class Logger {
         setDebugLevel(level);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setDebugLevel(LogLevel level) {
         this.debugLevel = level;
     }
@@ -73,6 +75,7 @@ public final class Logger {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void verbose(String suffix, String message) {
         if (debugLevel.intValue() > LogLevel.DEBUG.intValue()) {
             if (message.length() > 4000) {
@@ -84,6 +87,7 @@ public final class Logger {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void verbose(String suffix, String message, Throwable t) {
         if (debugLevel.intValue() > LogLevel.DEBUG.intValue()) {
             Log.v(CTGeofenceAPI.GEOFENCE_LOG_TAG + ":" + suffix, message, t);

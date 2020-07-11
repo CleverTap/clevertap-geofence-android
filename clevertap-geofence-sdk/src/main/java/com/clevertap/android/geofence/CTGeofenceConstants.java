@@ -9,7 +9,6 @@ public class CTGeofenceConstants {
     static final String CACHED_FILE_NAME = "geofence_cache.json";
     static final String SETTINGS_FILE_NAME = "geofence_settings.json";
 
-
     static final String ACTION_GEOFENCE_RECEIVER = "com.clevertap.android.geofence.fence.update";
     static final String ACTION_LOCATION_RECEIVER = "com.clevertap.android.geofence.location.update";
 

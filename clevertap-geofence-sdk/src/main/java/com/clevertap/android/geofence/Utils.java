@@ -5,6 +5,13 @@ import android.content.pm.PackageManager;
 
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 class Utils {
 
     private static Boolean isPlayServicesDependencyAvailable;
@@ -84,5 +91,23 @@ class Utils {
 
     static String emptyIfNull(String str) {
         return str == null ? "" : str;
+    }
+
+    static List<String> jsonToGeoFenceList(JSONObject jsonObject) {
+        ArrayList<String> geofenceIdList = new ArrayList<>();
+        try {
+            JSONArray array = jsonObject.getJSONArray("geofences");
+
+            for (int i = 0; i < array.length(); i++) {
+
+                JSONObject object = array.getJSONObject(i);
+                geofenceIdList.add(object.getString(CTGeofenceConstants.KEY_ID));
+            }
+        } catch (JSONException e) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Could not convert JSON to GeofenceIdList - " + e.getMessage());
+            e.printStackTrace();
+        }
+        return geofenceIdList;
     }
 }

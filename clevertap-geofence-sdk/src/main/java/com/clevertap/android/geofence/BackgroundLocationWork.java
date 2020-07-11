@@ -22,7 +22,6 @@ class BackgroundLocationWork extends ListenableWorker {
     @Override
     public ListenableFuture<Result> startWork() {
 
-
         ListenableFuture<Result> listenableFuture = CallbackToFutureAdapter.getFuture(new CallbackToFutureAdapter.Resolver<Result>() {
             @Nullable
             @Override
