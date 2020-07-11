@@ -9,6 +9,7 @@ class Utils {
 
     private static Boolean isPlayServicesDependencyAvailable;
     private static Boolean isFusedLocationDependencyAvailable;
+    private static Boolean isConcurrentFuturesDependencyAvailable;
 
     static boolean hasPermission(final Context context, String permission) {
         try {
@@ -59,6 +60,26 @@ class Utils {
         }
 
         return isFusedLocationDependencyAvailable;
+    }
+
+    /**
+     * Checks if Google Play services dependency is available.
+     *
+     * @return <code>true</code> if available, otherwise <code>false</code>.
+     */
+    static boolean isConcurrentFuturesDependencyAvailable() {
+
+        if (isConcurrentFuturesDependencyAvailable == null) {//use reflection only once
+            // concurrent futures
+            try {
+                Class.forName("androidx.concurrent.futures.CallbackToFutureAdapter");
+                isConcurrentFuturesDependencyAvailable = true;
+            } catch (ClassNotFoundException e) {
+                isConcurrentFuturesDependencyAvailable = false;
+            }
+        }
+
+        return isConcurrentFuturesDependencyAvailable;
     }
 
     static String emptyIfNull(String str) {

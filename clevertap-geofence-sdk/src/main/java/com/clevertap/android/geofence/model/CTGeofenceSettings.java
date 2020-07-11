@@ -14,8 +14,8 @@ public class CTGeofenceSettings {
     public static final byte ACCURACY_MEDIUM = 2;
     public static final byte ACCURACY_LOW = 3;
 
-    public static final byte FETCH_AUTO = 1; // BroadcastReceiver // current
-    public static final byte FETCH_PERIODIC = 2; // Work Manager // call getLastLocation()
+    public static final byte FETCH_CURRENT_LOCATION_PERIODIC = 1; // BroadcastReceiver // current
+    public static final byte FETCH_LAST_LOCATION_PERIODIC = 2; // Work Manager // call getLastLocation()
 
 
     private CTGeofenceSettings(Builder builder) {
@@ -29,7 +29,7 @@ public class CTGeofenceSettings {
 
         private boolean backgroundLocationUpdates = true;
         private byte locationAccuracy = ACCURACY_HIGH;
-        private byte locationFetchMode = FETCH_PERIODIC;
+        private byte locationFetchMode = FETCH_LAST_LOCATION_PERIODIC;
         private LogLevel logLevel = LogLevel.DEBUG;
 
         public Builder() {

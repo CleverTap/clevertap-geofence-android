@@ -7,7 +7,7 @@ import android.location.Location;
 
 import com.google.android.gms.location.LocationResult;
 
-class CTLocationUpdateReceiver extends BroadcastReceiver {
+public class CTLocationUpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {

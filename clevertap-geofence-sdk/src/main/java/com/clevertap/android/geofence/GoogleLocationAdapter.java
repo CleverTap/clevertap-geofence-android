@@ -4,12 +4,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.clevertap.android.geofence.interfaces.CTLocatioCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
@@ -19,7 +17,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
@@ -29,7 +26,7 @@ import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.clevertap.android.geofence.CTGeofenceConstants.TAG_WORK_LOCATION_UPDATES;
 
-public class GoogleLocationAdapter implements CTLocationAdapter {
+class GoogleLocationAdapter implements CTLocationAdapter {
 
     private static final long INTERVAL_IN_MILLIS = 90 * 60 * 1000; // TODO: Exact values
     private static final long INTERVAL_FASTEST_IN_MILLIS = 90 * 60 * 1000;
@@ -54,6 +51,9 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
     @WorkerThread
     @Override
     public void requestLocationUpdates() {
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "requestLocationUpdates() called");
+
         applySettings(context);
 
         if (!backgroundLocationUpdatesEnabled) {
@@ -62,7 +62,8 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
             return;
         }
 
-        if (locationFetchMode == CTGeofenceSettings.FETCH_AUTO) {
+        if (locationFetchMode == CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC) {
+
 
             // should get same pendingIntent on each app launch or else instance will leak
             PendingIntent pendingIntent = PendingIntentFactory.getPendingIntent(context,
@@ -70,12 +71,18 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
 
             clearLocationWorkRequest();
 
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "requesting current location periodically..");
+
             try {
                 // will overwrite location request if change in location config is detected
                 Task<Void> requestLocationUpdatesTask = fusedProviderClient.requestLocationUpdates(getLocationRequest(), pendingIntent);
 
                 // blocking task
                 Tasks.await(requestLocationUpdatesTask);
+
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Finished requesting current location periodically..");
             } catch (Exception e) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Failed to request location updates");
@@ -95,14 +102,37 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
     }
 
     private void scheduleManualLocationUpdates() {
-        PeriodicWorkRequest locationRequest = new PeriodicWorkRequest.Builder(BackgroundLocationWork.class,
-                INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS,
-                FLEX_INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS)
-                .build();
 
-        // schedule unique work request to avoid duplicates
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG_WORK_LOCATION_UPDATES,
-                ExistingPeriodicWorkPolicy.KEEP, locationRequest);
+        if (!Utils.isConcurrentFuturesDependencyAvailable()) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "concurrent-futures dependency is missing");
+            return;
+        }
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Scheduling periodic last location request..");
+
+        try {
+            PeriodicWorkRequest locationRequest = new PeriodicWorkRequest.Builder(BackgroundLocationWork.class,
+                    INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS,
+                    FLEX_INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS)
+                    .build();
+
+            // schedule unique work request to avoid duplicates
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG_WORK_LOCATION_UPDATES,
+                    ExistingPeriodicWorkPolicy.KEEP, locationRequest);
+
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Finished scheduling periodic last location request..");
+
+        } catch (NoClassDefFoundError t) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "WorkManager dependency is missing");
+        } catch (Throwable t) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Failed to request periodic work request");
+            t.printStackTrace();
+        }
     }
 
     @WorkerThread
@@ -122,21 +152,21 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
     public void getLastLocation(final CTLocatioCallback callback) {
         //thread safe
 
-        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                "getLastLocation() called");
-
         if (callback == null) {
             throw new IllegalArgumentException("location callback can not be null");
         }
 
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Requesting Last Location..");
+
+        Location location = null;
         try {
             Task<Location> lastLocation = fusedProviderClient.getLastLocation();
 
             // blocking task
-            Location location = Tasks.await(lastLocation);
+            location = Tasks.await(lastLocation);
 
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location fetch completed");
-            callback.onLocationComplete(location);
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location request completed");
+
 
             /*lastLocation.addOnCompleteListener(new OnCompleteListener<Location>() {
                 @Override
@@ -159,6 +189,8 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to request last location");
             e.printStackTrace();
+        } finally {
+            callback.onLocationComplete(location);
         }
 
     }
@@ -168,7 +200,7 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
         return 0;
     }
 
-    LocationRequest getLocationRequest() {
+    private LocationRequest getLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(INTERVAL_IN_MILLIS);
         locationRequest.setFastestInterval(INTERVAL_FASTEST_IN_MILLIS);
@@ -198,12 +230,29 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
     }
 
     private void clearLocationWorkRequest() {
+
+        if (!Utils.isConcurrentFuturesDependencyAvailable()) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "concurrent-futures dependency is missing");
+            return;
+        }
+
         try {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "removing periodic last location request..");
+
             WorkManager.getInstance(context).cancelUniqueWork(TAG_WORK_LOCATION_UPDATES);
-        } catch (Exception e) {
+
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Successfully removed periodic last location request");
+
+        } catch (NoClassDefFoundError t) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "WorkManager dependency is missing");
+        } catch (Throwable t) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to cancel location work request");
-            e.printStackTrace();
+            t.printStackTrace();
         }
     }
 
@@ -216,6 +265,10 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
         }
 
         try {
+
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "removing periodic current location request..");
+
             Task<Void> removeLocationUpdatesTask = fusedProviderClient.removeLocationUpdates(pendingIntent);
 
             // blocking task
@@ -224,7 +277,7 @@ public class GoogleLocationAdapter implements CTLocationAdapter {
             pendingIntent.cancel();
 
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Location updates removed successfully");
+                    "Successfully removed periodic current location request");
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to remove location updates");

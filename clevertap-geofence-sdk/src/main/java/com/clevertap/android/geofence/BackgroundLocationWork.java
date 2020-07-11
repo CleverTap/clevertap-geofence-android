@@ -22,7 +22,8 @@ class BackgroundLocationWork extends ListenableWorker {
     @Override
     public ListenableFuture<Result> startWork() {
 
-        return CallbackToFutureAdapter.getFuture(new CallbackToFutureAdapter.Resolver<Result>() {
+
+        ListenableFuture<Result> listenableFuture = CallbackToFutureAdapter.getFuture(new CallbackToFutureAdapter.Resolver<Result>() {
             @Nullable
             @Override
             public Object attachCompleter(@NonNull final CallbackToFutureAdapter.Completer<Result> completer) throws Exception {
@@ -43,6 +44,8 @@ class BackgroundLocationWork extends ListenableWorker {
                 return ctLocatioCallback;
             }
         });
+
+        return listenableFuture;
 
     }
 

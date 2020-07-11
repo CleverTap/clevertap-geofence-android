@@ -43,6 +43,11 @@ public class FileUtils {
             //Make your FilePath and File
             String yourFilePath = context.getFilesDir() + "/" + fileNameWithPath;
             File yourFile = new File(yourFilePath);
+
+            if (!yourFile.exists())
+            {
+                return content;
+            }
             //Make an InputStream with your File in the constructor
             InputStream inputStream = new FileInputStream(yourFile);
             StringBuilder stringBuilder = new StringBuilder();

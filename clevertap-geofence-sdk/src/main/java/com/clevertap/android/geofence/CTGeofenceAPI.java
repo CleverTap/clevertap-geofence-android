@@ -1,5 +1,6 @@
 package com.clevertap.android.geofence;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
@@ -87,15 +88,15 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      *
      * @param accountId clevertap account id
      */
-    public void setAccountId(String accountId){
+    public void setAccountId(String accountId) {
 
-        if (accountId==null) {
+        if (accountId == null) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Account Id is null");
             return;
         }
 
-        this.accountId=accountId;
+        this.accountId = accountId;
     }
 
     /**
@@ -103,15 +104,15 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
      *
      * @param guid
      */
-    public void setGUID(String guid){
+    public void setGUID(String guid) {
 
-        if (guid==null) {
+        if (guid == null) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "guid is null");
             return;
         }
 
-        this.guid=guid;
+        this.guid = guid;
     }
 
     /**
@@ -123,7 +124,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
         if (isActivated) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Geofence API already activated! dropping this call");
+                    "Geofence API already activated! dropping activate() call");
             return;
         }
 
@@ -141,6 +142,25 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         ctGeofenceInterface.setGeoFenceCallback(this);
         logger.debug(GEOFENCE_LOG_TAG, "geofence callback registered");
 
+        isActivated = true;
+        initBackgroundLocationUpdates();
+    }
+
+    public void initBackgroundLocationUpdates() {
+
+        if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "We don't have ACCESS_FINE_LOCATION permission! dropping initBackgroundLocationUpdates() call");
+            return;
+        }
+
+        logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "requestBackgroundLocationUpdates() called");
+
+        if (!isActivated) {
+            throw new IllegalStateException("activate() must be called before requestBackgroundLocationUpdates()");
+        }
+
         LocationUpdateTask locationUpdateTask = new LocationUpdateTask(context);
         locationUpdateTask.setOnCompleteListener(new CTGeofenceTask.OnCompleteListener() {
             @Override
@@ -154,8 +174,6 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
         CTGeofenceTaskManager.getInstance().postAsyncSafely("IntitializeLocationUpdates",
                 locationUpdateTask);
-
-        isActivated = true;
     }
 
     /**
@@ -194,6 +212,12 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "triggerLocation() called");
 
+        if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "We don't have ACCESS_FINE_LOCATION permission! dropping triggerLocation() call");
+            return;
+        }
+
         if (!isActivated) {
             throw new IllegalStateException("activate() must be called before triggerLocation()");
         }
@@ -221,6 +245,12 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
     @Override
     public void onSuccess(final JSONObject fenceList) {
+
+        if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "We don't have ACCESS_FINE_LOCATION permission! dropping geofence update call");
+            return;
+        }
 
         if (fenceList == null) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,

@@ -64,7 +64,7 @@ class LocationUpdateTask implements CTGeofenceTask {
 
         } else if (ctGeofenceSettings.isBackgroundLocationUpdatesEnabled()
                 && (locationPendingIntent == null
-                || (currentAccuracy != lastAccuracy && currentFetchMode == CTGeofenceSettings.FETCH_AUTO)
+                || (currentAccuracy != lastAccuracy && currentFetchMode == CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC)
                 || currentFetchMode != lastFetchMode)) {
 
             // if background location enabled and if location update request is not already registered
