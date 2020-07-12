@@ -15,8 +15,8 @@ public class CTGeofence {
 
     private final int transitionType;
     private final String id;
-    private final float latitude;
-    private final float longitude;
+    private final double latitude;
+    private final double longitude;
     private final int radius;
 
     private CTGeofence(Builder builder) {
@@ -31,8 +31,8 @@ public class CTGeofence {
 
         private int transitionType;
         private String id;
-        private float latitude;
-        private float longitude;
+        private double latitude;
+        private double longitude;
         private int radius;
 
         Builder(String id) {
@@ -44,12 +44,12 @@ public class CTGeofence {
             return this;
         }
 
-        CTGeofence.Builder setLatitude(float latitude) {
+        CTGeofence.Builder setLatitude(double latitude) {
             this.latitude = latitude;
             return this;
         }
 
-        CTGeofence.Builder setLongitude(float longitude) {
+        CTGeofence.Builder setLongitude(double longitude) {
             this.longitude = longitude;
             return this;
         }
@@ -72,11 +72,11 @@ public class CTGeofence {
         return transitionType;
     }
 
-    public float getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public float getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
@@ -95,8 +95,8 @@ public class CTGeofence {
 
                 JSONObject object = array.getJSONObject(i);
                 CTGeofence geofence = new Builder(String.valueOf(object.getInt(CTGeofenceConstants.KEY_ID)))
-                        .setLatitude((Float) object.get("lat"))
-                        .setLongitude((Float) object.get("lng"))
+                        .setLatitude(object.getDouble("lat"))
+                        .setLongitude(object.getDouble("lng"))
                         .setRadius(object.getInt("r"))
                         .build();
                 geofenceList.add(geofence);

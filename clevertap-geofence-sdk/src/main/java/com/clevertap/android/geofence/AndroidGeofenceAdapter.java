@@ -26,11 +26,6 @@ public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
-    @Override
-    public void addGeofence(CTGeofence fence) {
-
-    }
-
     @SuppressLint("MissingPermission")
     @Override
     public void addAllGeofence(List<CTGeofence> fenceList, OnSuccessListener onSuccessListener) {
@@ -46,11 +41,6 @@ public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
             }
 
         }
-    }
-
-    @Override
-    public void removeGeofence(String id) {
-
     }
 
     @Override

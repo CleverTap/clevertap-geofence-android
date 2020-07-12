@@ -30,6 +30,12 @@ class GeofenceUpdateTask implements CTGeofenceTask {
     @Override
     public void execute() {
 
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Executing GeofenceUpdateTask...");
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Reading previously registered geofences from file...");
+
         String oldFenceListString = FileUtils.readFromFile(context,
                 FileUtils.getCachedFullPath(context,CTGeofenceConstants.CACHED_FILE_NAME));
 
@@ -64,6 +70,9 @@ class GeofenceUpdateTask implements CTGeofenceTask {
             // add new fences
             addGeofences(fenceList);
         }
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Finished executing GeofenceUpdateTask");
     }
 
     private void addGeofences(JSONObject fenceList) {
@@ -72,9 +81,23 @@ class GeofenceUpdateTask implements CTGeofenceTask {
             return;
         }
         //TODO add debug logging here
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Writing new geofences to file...");
+
         //add new geofences, this will overwrite old ones
-        FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
+        boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
                 CTGeofenceConstants.CACHED_FILE_NAME, fenceList);
+
+        if (writeJsonToFile)
+        {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "New geofences successfully written to file");
+        } else {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Failed to write new geofences to file");
+        }
+
         List<CTGeofence> ctGeofenceList = CTGeofence.from(fenceList);
 
         ctGeofenceAdapter.addAllGeofence(ctGeofenceList, new OnSuccessListener() {

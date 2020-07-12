@@ -32,6 +32,9 @@ class LocationUpdateTask implements CTGeofenceTask {
     @Override
     public void execute() {
 
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Executing LocationUpdateTask...");
+
         // FLAG_NO_CREATE will tell us if pending intent already exists and is active
         PendingIntent locationPendingIntent = PendingIntentFactory.getPendingIntent(context,
                 PendingIntentFactory.PENDING_INTENT_LOCATION, FLAG_NO_CREATE);
@@ -40,6 +43,10 @@ class LocationUpdateTask implements CTGeofenceTask {
         int lastFetchMode = -1;
         int currentAccuracy = ctGeofenceSettings.getLocationAccuracy();
         int currentFetchMode = ctGeofenceSettings.getLocationFetchMode();
+
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Reading settings from file...");
 
         // read settings from file
         String settingsString = FileUtils.readFromFile(context,
@@ -75,21 +82,37 @@ class LocationUpdateTask implements CTGeofenceTask {
                     "Dropping duplicate location update request");
         }
 
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Writing new settings to file...");
+
         // write new settings to file
         JSONObject settings = new JSONObject();
         try {
             settings.put(CTGeofenceConstants.KEY_LAST_ACCURACY, currentAccuracy);
             settings.put(CTGeofenceConstants.KEY_LAST_FETCH_MODE, currentFetchMode);
-            FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
+            boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
                     CTGeofenceConstants.SETTINGS_FILE_NAME, settings);
+
+            if (writeJsonToFile)
+            {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "New settings successfully written to file");
+            } else {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Failed to write new settings to file");
+            }
+
         } catch (JSONException e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Failed to write geofence settings to file");
+                    "Failed to write new settings to file while parsing json");
         }
 
         if (onCompleteListener != null) {
             onCompleteListener.onComplete();
         }
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Finished executing LocationUpdateTask");
     }
 
     @Override

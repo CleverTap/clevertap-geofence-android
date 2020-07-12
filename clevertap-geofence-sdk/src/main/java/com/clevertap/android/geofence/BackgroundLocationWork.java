@@ -9,7 +9,7 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.work.ListenableWorker;
 import androidx.work.WorkerParameters;
 
-import com.clevertap.android.geofence.interfaces.CTLocatioCallback;
+import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 
 class BackgroundLocationWork extends ListenableWorker {
@@ -27,7 +27,7 @@ class BackgroundLocationWork extends ListenableWorker {
             @Override
             public Object attachCompleter(@NonNull final CallbackToFutureAdapter.Completer<Result> completer) throws Exception {
 
-                CTLocatioCallback ctLocatioCallback = new CTLocatioCallback() {
+                CTLocationCallback ctLocationCallback = new CTLocationCallback() {
                     @Override
                     public void onLocationComplete(Location location) {
                         CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
@@ -38,9 +38,9 @@ class BackgroundLocationWork extends ListenableWorker {
                 };
 
                 CTGeofenceAPI.getInstance(getApplicationContext()).getCtLocationAdapter().getLastLocation(
-                        ctLocatioCallback);
+                        ctLocationCallback);
 
-                return ctLocatioCallback;
+                return ctLocationCallback;
             }
         });
 

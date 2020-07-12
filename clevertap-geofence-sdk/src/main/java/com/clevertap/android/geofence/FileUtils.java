@@ -15,14 +15,15 @@ import java.io.InputStreamReader;
 @SuppressWarnings("WeakerAccess")
 public class FileUtils {
 
-    static void writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
+    static boolean writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
+        boolean isWriteSuccessful = false;
         try {
             if (jsonObject == null || TextUtils.isEmpty(dirName) || TextUtils.isEmpty(fileName))
-                return;
+                return false;
             File file = new File(context.getFilesDir(), dirName);
             if (!file.exists()) {
                 if (!file.mkdir())
-                    return;// if directory is not created don't proceed and return
+                    return false;
             }
 
             File file1 = new File(file, fileName);
@@ -30,10 +31,16 @@ public class FileUtils {
             writer.append(jsonObject.toString());
             writer.flush();
             writer.close();
+
+            isWriteSuccessful = true;
+            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, fileName
+                    + ": writeFileOnInternalStorage: successful");
         } catch (Exception e) {
             e.printStackTrace();
             CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + e.getLocalizedMessage());
         }
+
+        return isWriteSuccessful;
     }
 
     static String readFromFile(Context context, String fileNameWithPath) {
@@ -45,8 +52,7 @@ public class FileUtils {
             String yourFilePath = context.getFilesDir() + "/" + fileNameWithPath;
             File yourFile = new File(yourFilePath);
 
-            if (!yourFile.exists())
-            {
+            if (!yourFile.exists()) {
                 return content;
             }
             //Make an InputStream with your File in the constructor
@@ -84,32 +90,15 @@ public class FileUtils {
                 String[] children = file.list();
                 if (children != null) {
                     for (String child : children) {
-                        new File(file, child).delete();
+                        String isDeleted = new File(file, child).delete() ? "successfully deleted" : "failed to delete";
+                        CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                child + " :" + isDeleted);
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + dirName + " Error:" + e.getLocalizedMessage());
-        }
-    }
-
-    //TODO Do we need this?
-    static void deleteFile(Context context, String fileName) {
-        if (TextUtils.isEmpty(fileName) || context == null)
-            return;
-        try {
-            File file = new File(context.getFilesDir(), fileName);
-            if (file.exists()) {
-                if (file.delete()) {
-                    CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "File Deleted:" + fileName);
-                } else {
-                    CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Failed to delete file" + fileName);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "writeFileOnInternalStorage: failed" + fileName + " Error:" + e.getLocalizedMessage());
+            CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "deleteFileOnInternalStorage: failed" + dirName + " Error:" + e.getLocalizedMessage());
         }
     }
 

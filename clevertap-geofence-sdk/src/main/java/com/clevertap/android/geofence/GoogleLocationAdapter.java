@@ -9,7 +9,7 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.clevertap.android.geofence.interfaces.CTLocatioCallback;
+import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import com.clevertap.android.geofence.model.CTGeofenceSettings;
 import com.google.android.gms.common.ConnectionResult;
@@ -28,8 +28,8 @@ import static com.clevertap.android.geofence.CTGeofenceConstants.TAG_WORK_LOCATI
 
 class GoogleLocationAdapter implements CTLocationAdapter {
 
-    private static final long INTERVAL_IN_MILLIS = 90 * 60 * 1000; // TODO: Exact values
-    private static final long INTERVAL_FASTEST_IN_MILLIS = 90 * 60 * 1000;
+    private static final long INTERVAL_IN_MILLIS = /*90 **/ 60 * 1000; // TODO: Exact values
+    private static final long INTERVAL_FASTEST_IN_MILLIS = /*90 **/ 60 * 1000;
     private static final float SMALLEST_DISPLACEMENT_IN_METERS = 2;
     private static final long FLEX_INTERVAL_IN_MILLIS = 15 * 60 * 1000;
     private final Context context;
@@ -141,14 +141,9 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         clearLocationWorkRequest();
     }
 
-    @Override
-    public void setLocationAccuracy(int accuracy) {
-
-    }
-
     @WorkerThread
     @Override
-    public void getLastLocation(final CTLocatioCallback callback) {
+    public void getLastLocation(final CTLocationCallback callback) {
         //thread safe
 
         if (callback == null) {
@@ -192,11 +187,6 @@ class GoogleLocationAdapter implements CTLocationAdapter {
             callback.onLocationComplete(location);
         }
 
-    }
-
-    @Override
-    public int getLocationAccuracy() {
-        return 0;
     }
 
     private LocationRequest getLocationRequest() {

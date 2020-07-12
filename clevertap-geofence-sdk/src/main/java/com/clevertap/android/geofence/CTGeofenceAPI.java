@@ -9,7 +9,7 @@ import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.interfaces.CTGeofenceCallback;
 import com.clevertap.android.geofence.interfaces.CTGeofenceInterface;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
-import com.clevertap.android.geofence.interfaces.CTLocatioCallback;
+import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import com.clevertap.android.geofence.model.CTGeofenceSettings;
 
@@ -166,7 +166,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
                 "requestBackgroundLocationUpdates() called");
 
         if (!isActivated) {
-            throw new IllegalStateException("activate() must be called before requestBackgroundLocationUpdates()");
+            throw new IllegalStateException("Geofence SDK must be initialized before initBackgroundLocationUpdates()");
             //TODO: app is not calling activate() in any case, so this logging needs to change
         }
 
@@ -205,9 +205,13 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
                         PendingIntentFactory.PENDING_INTENT_LOCATION, FLAG_NO_CREATE);
                 ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
 
+                // delete cached files
+                FileUtils.deleteDirectory(context,FileUtils.getCachedDirName(context));
+
                 isActivated = false;
             }
         });
+
 
     }
 
@@ -227,7 +231,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         }
 
         if (!isActivated) {
-            throw new IllegalStateException("activate() must be called before triggerLocation()");
+            throw new IllegalStateException("Geofence SDK must be initialized before triggerLocation()");
             //TODO: app is not calling activate() in any case, so this logging needs to change
         }
 
@@ -235,7 +239,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
                 new Runnable() {
                     @Override
                     public void run() {
-                        ctLocationAdapter.getLastLocation(new CTLocatioCallback() {
+                        ctLocationAdapter.getLastLocation(new CTLocationCallback() {
                             @Override
                             public void onLocationComplete(Location location) {
                                 //get's called on bg thread
@@ -258,6 +262,12 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_FINE_LOCATION permission! dropping geofence update call");
+            return;
+        }
+
+        if (!Utils.hasPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "We don't have ACCESS_BACKGROUND_LOCATION permission! dropping geofence update call");
             return;
         }
 

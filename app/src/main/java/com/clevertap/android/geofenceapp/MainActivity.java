@@ -16,6 +16,10 @@ import android.view.View;
 import com.clevertap.android.geofence.CTGeofenceAPI;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -36,15 +40,29 @@ public class MainActivity extends AppCompatActivity {
      * Return the current state of the permissions needed.
      */
     private boolean checkPermissions() {
-        int permissionState = ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-        return permissionState == PackageManager.PERMISSION_GRANTED;
+        int fineLocationPermissionState = ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        int backgroundLocationPermissionState = ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
+        return (fineLocationPermissionState == PackageManager.PERMISSION_GRANTED) &&
+                (backgroundLocationPermissionState == PackageManager.PERMISSION_GRANTED);
     }
 
     private void requestPermissions() {
+        boolean permissionAccessFineLocationApproved =
+                ActivityCompat.checkSelfPermission(
+                        this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        boolean backgroundLocationPermissionApproved =
+                ActivityCompat.checkSelfPermission(
+                        this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED;
+
         boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
+                permissionAccessFineLocationApproved && backgroundLocationPermissionApproved;
 
         // Provide an additional rationale to the user. This would happen if the user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
@@ -55,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(View view) {
                             // Request permission
                             ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                                     REQUEST_PERMISSIONS_REQUEST_CODE);
                         }
                     });
@@ -64,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             // sets the permission in a given state or the user denied the permission
             // previously and checked "Never ask again".
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
@@ -79,8 +97,24 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length <= 0) {
                 // If user interaction was interrupted, the permission request is cancelled and you
                 // receive empty arrays.
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //CTGeofenceAPI.getInstance(getApplicationContext()).requestBackgroundLocationUpdates();
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1]==PackageManager.PERMISSION_GRANTED) {
+                JSONObject jsonObject=new JSONObject();
+                JSONArray jsonArray=new JSONArray();
+                JSONObject object=new JSONObject();
+                try {
+                    object.put("lat",19.231585);
+                    object.put("lng",72.8464133);
+                    object.put("r",200);
+                    object.put("id",200356);
+
+                    jsonArray.put(object);
+                    jsonObject.put("geofences",jsonArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+                CTGeofenceAPI.getInstance(getApplicationContext()).onSuccess(jsonObject);
             } else {
                 // Permission denied.
 

@@ -77,10 +77,11 @@ public class CTGeofenceService extends JobIntentService {
 
 
     /**
-     *  Push geofence event to CT SDK. If multiple geofences are triggered then send it sequentially
+     * Push geofence event to CT SDK. If multiple geofences are triggered then send it sequentially
+     *
      * @param triggeringGeofences - List of {@link Geofence}
-     * @param triggeringLocation - {@link Location} object
-     * @param geofenceTransition - int value of geofence transition event
+     * @param triggeringLocation  - {@link Location} object
+     * @param geofenceTransition  - int value of geofence transition event
      */
     private void pushGeofenceEvents(List<Geofence> triggeringGeofences, Location triggeringLocation,
                                     int geofenceTransition) {
@@ -93,12 +94,9 @@ public class CTGeofenceService extends JobIntentService {
 
         }
 
-        boolean isTriggeredGeofenceFound = false;
-
-
         // Search triggered geofences in file by id and send stored geofence object to CT SDK
         String oldFenceListString = FileUtils.readFromFile(getApplicationContext(),
-                FileUtils.getCachedFullPath(getApplicationContext(),CTGeofenceConstants.CACHED_FILE_NAME));
+                FileUtils.getCachedFullPath(getApplicationContext(), CTGeofenceConstants.CACHED_FILE_NAME));
         if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
 
             JSONObject jsonObject;
@@ -107,11 +105,22 @@ public class CTGeofenceService extends JobIntentService {
                 JSONArray jsonArray = jsonObject.getJSONArray(CTGeofenceConstants.KEY_GEOFENCES);
 
                 for (Geofence triggeredGeofence : triggeringGeofences) {
+
+                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                            "Searching Triggered geofence with id = " + triggeredGeofence.getRequestId()
+                                    + " in file...");
+
+                    boolean isTriggeredGeofenceFound = false;
+
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject geofence = jsonArray.getJSONObject(i);
                         if (String.valueOf(geofence.getInt(CTGeofenceConstants.KEY_ID))
                                 .equals(triggeredGeofence.getRequestId())) {
                             // triggered geofence found in file
+
+                            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                    "Triggered geofence with id = " + triggeredGeofence.getRequestId()
+                                            + " is found in file! Sending it to CT SDK");
 
                             isTriggeredGeofenceFound = true;
 
@@ -130,17 +139,19 @@ public class CTGeofenceService extends JobIntentService {
                             //TODO add some verbose logging here to help us debug prod issues
                         }
                     }
+
+                    if (!isTriggeredGeofenceFound) {
+                        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                "Triggered geofence with id = " + triggeredGeofence.getRequestId()
+                                        + " is not found in file! Dropping this event");
+                    }
+
                 }
             } catch (Exception e) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Failed to read triggered geofences from file");
                 e.printStackTrace();
             }
-        }
-
-        if (!isTriggeredGeofenceFound) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Triggered geofences not found in file! dropping this geofence event");
         }
 
         // due to some reasons if triggered fences is not found then push below response

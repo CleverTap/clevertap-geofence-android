@@ -31,11 +31,6 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         geofencingClient = LocationServices.getGeofencingClient(this.context);
     }
 
-    @Override
-    public void addGeofence(CTGeofence fence) {
-        //TODO Do we need this?
-    }
-
     @SuppressWarnings("unchecked")
     @WorkerThread
     @Override
@@ -87,11 +82,6 @@ public class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     }
 
-
-    @Override
-    public void removeGeofence(String id) {
-
-    }
 
     @SuppressWarnings("unchecked")
     @WorkerThread

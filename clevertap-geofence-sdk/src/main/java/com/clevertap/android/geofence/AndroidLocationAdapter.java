@@ -3,7 +3,7 @@ package com.clevertap.android.geofence;
 import android.app.PendingIntent;
 import android.content.Context;
 
-import com.clevertap.android.geofence.interfaces.CTLocatioCallback;
+import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 
 public class AndroidLocationAdapter implements CTLocationAdapter {
@@ -22,16 +22,6 @@ public class AndroidLocationAdapter implements CTLocationAdapter {
     }
 
     @Override
-    public void setLocationAccuracy(int accuracy) {
-
-    }
-
-    @Override
-    public int getLocationAccuracy() {
-        return 0;
-    }
-
-    @Override
-    public void getLastLocation(CTLocatioCallback callback) {
+    public void getLastLocation(CTLocationCallback callback) {
     }
 }
