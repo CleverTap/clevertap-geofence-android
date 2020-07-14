@@ -29,7 +29,7 @@ public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
     @SuppressLint("MissingPermission")
     @Override
     public void addAllGeofence(List<CTGeofence> fenceList, OnSuccessListener onSuccessListener) {
-        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
+       /* Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
                 100, intent, 0);
 
@@ -40,7 +40,7 @@ public class AndroidGeofenceAdapter implements CTGeofenceAdapter {
                         ctGeofence.getRadius(), GEOFENCE_EXPIRATION_IN_MILLISECONDS, pendingIntent);
             }
 
-        }
+        }*/
     }
 
     @Override

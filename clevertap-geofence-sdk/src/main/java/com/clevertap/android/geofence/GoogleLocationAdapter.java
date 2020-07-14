@@ -11,9 +11,6 @@ import androidx.work.WorkManager;
 
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
-import com.clevertap.android.geofence.model.CTGeofenceSettings;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -30,22 +27,17 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
     private static final long INTERVAL_IN_MILLIS = /*90 **/ 60 * 1000; // TODO: Exact values
     private static final long INTERVAL_FASTEST_IN_MILLIS = /*90 **/ 60 * 1000;
-    private static final float SMALLEST_DISPLACEMENT_IN_METERS = 2;
+    private static final float SMALLEST_DISPLACEMENT_IN_METERS = 0;
     private static final long FLEX_INTERVAL_IN_MILLIS = 15 * 60 * 1000;
     private final Context context;
     private final FusedLocationProviderClient fusedProviderClient;
     private boolean backgroundLocationUpdatesEnabled;
     private int locationFetchMode;
     private int locationAccuracy = LocationRequest.PRIORITY_HIGH_ACCURACY;
-    private boolean isPlayServicesAvailable; //TODO do we need this? If yes, do we need it global?
 
     GoogleLocationAdapter(Context context) {
         this.context = context.getApplicationContext();
         fusedProviderClient = LocationServices.getFusedLocationProviderClient(this.context);
-
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this.context) == ConnectionResult.SUCCESS) {
-            isPlayServicesAvailable = true;
-        }
     }
 
     @WorkerThread

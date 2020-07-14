@@ -103,8 +103,8 @@ public class FileUtils {
     }
 
     static String getCachedDirName(Context context) {
-        return CTGeofenceConstants.CACHED_DIR_NAME + "_" + CTGeofenceAPI.getInstance(context).getAccountId()
-                + "_" + CTGeofenceAPI.getInstance(context).getGuid();
+        return CTGeofenceConstants.CACHED_DIR_NAME /*+ "_" + CTGeofenceAPI.getInstance(context).getAccountId()
+                + "_" + CTGeofenceAPI.getInstance(context).getGuid()*/;
     }
 
     static String getCachedFullPath(Context context, String fileName) {

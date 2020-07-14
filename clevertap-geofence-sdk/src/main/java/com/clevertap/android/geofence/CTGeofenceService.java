@@ -6,7 +6,9 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
+import androidx.work.ListenableWorker;
 
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
@@ -34,6 +36,16 @@ public class CTGeofenceService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Handling work in CTGeofenceService...");
+
+        if (!Utils.initCTGeofenceApiIfRequired(getApplicationContext()))
+        {
+            // if init fails then return without doing any work
+            return;
+        }
+
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 

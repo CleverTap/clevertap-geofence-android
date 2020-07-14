@@ -5,10 +5,6 @@ import android.content.Context;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
-import com.clevertap.android.geofence.model.CTGeofenceSettings;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 
@@ -45,31 +41,21 @@ class LocationUpdateTask implements CTGeofenceTask {
         int currentFetchMode = ctGeofenceSettings.getLocationFetchMode();
 
 
-        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                "Reading settings from file...");
-
         // read settings from file
-        String settingsString = FileUtils.readFromFile(context,
-                FileUtils.getCachedFullPath(context,CTGeofenceConstants.SETTINGS_FILE_NAME));
-        if (settingsString != null && !settingsString.trim().equals("")) {
-            try {
-                JSONObject jsonObject = new JSONObject(settingsString);
-                lastAccuracy = jsonObject.getInt(CTGeofenceConstants.KEY_LAST_ACCURACY);
-                lastFetchMode = jsonObject.getInt(CTGeofenceConstants.KEY_LAST_FETCH_MODE);
-
-            } catch (Exception e) {
-                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                        "Failed to read geofence settings from file");
-            }
+        CTGeofenceSettings lastGeofenceSettings = Utils.readSettingsFromFile(context);
+        if (lastGeofenceSettings!=null)
+        {
+            lastAccuracy=lastGeofenceSettings.getLocationAccuracy();
+            lastFetchMode=lastGeofenceSettings.getLocationFetchMode();
         }
 
 
         // if background location disabled and if location update request is already registered then remove it
-        if (!ctGeofenceSettings.isBackgroundLocationUpdatesEnabled() && locationPendingIntent != null) {
+        if (!this.ctGeofenceSettings.isBackgroundLocationUpdatesEnabled() && locationPendingIntent != null) {
 
             ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
 
-        } else if (ctGeofenceSettings.isBackgroundLocationUpdatesEnabled()
+        } else if (this.ctGeofenceSettings.isBackgroundLocationUpdatesEnabled()
                 && (locationPendingIntent == null
                 || (currentAccuracy != lastAccuracy && currentFetchMode == CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC)
                 || currentFetchMode != lastFetchMode)) {
@@ -82,30 +68,8 @@ class LocationUpdateTask implements CTGeofenceTask {
                     "Dropping duplicate location update request");
         }
 
-        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                "Writing new settings to file...");
-
         // write new settings to file
-        JSONObject settings = new JSONObject();
-        try {
-            settings.put(CTGeofenceConstants.KEY_LAST_ACCURACY, currentAccuracy);
-            settings.put(CTGeofenceConstants.KEY_LAST_FETCH_MODE, currentFetchMode);
-            boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
-                    CTGeofenceConstants.SETTINGS_FILE_NAME, settings);
-
-            if (writeJsonToFile)
-            {
-                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                        "New settings successfully written to file");
-            } else {
-                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                        "Failed to write new settings to file");
-            }
-
-        } catch (JSONException e) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Failed to write new settings to file while parsing json");
-        }
+        Utils.writeSettingsToFile(context,ctGeofenceSettings);
 
         if (onCompleteListener != null) {
             onCompleteListener.onComplete();

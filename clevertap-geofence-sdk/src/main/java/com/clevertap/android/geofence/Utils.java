@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 
 import androidx.core.content.ContextCompat;
 
+import com.clevertap.android.sdk.CleverTapAPI;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,5 +111,101 @@ class Utils {
             e.printStackTrace();
         }
         return geofenceIdList;
+    }
+
+
+    static CTGeofenceSettings readSettingsFromFile(Context context) {
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Reading settings from file...");
+
+        CTGeofenceSettings ctGeofenceSettings = null;
+
+        String settingsString = FileUtils.readFromFile(context,
+                FileUtils.getCachedFullPath(context, CTGeofenceConstants.SETTINGS_FILE_NAME));
+        if (settingsString != null && !settingsString.trim().equals("")) {
+            try {
+                JSONObject jsonObject = new JSONObject(settingsString);
+
+                ctGeofenceSettings = new CTGeofenceSettings.Builder()
+                        .enableBackgroundLocationUpdates(jsonObject.getBoolean(CTGeofenceConstants.KEY_LAST_BG_LOCATION_UPDATES))
+                        .setLocationAccuracy((byte) jsonObject.getInt(CTGeofenceConstants.KEY_LAST_ACCURACY))
+                        .setLocationFetchMode((byte) jsonObject.getInt(CTGeofenceConstants.KEY_LAST_FETCH_MODE))
+                        .setDebugLevel(Logger.LogLevel.valueOf(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_LOG_LEVEL)))
+                        .setId(jsonObject.getString(CTGeofenceConstants.KEY_ID))
+                        .build();
+
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Read settings successfully from file");
+
+            } catch (Exception e) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Failed to read geofence settings from file");
+            }
+        } else {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Settings not found in file...");
+        }
+
+        return ctGeofenceSettings;
+
+    }
+
+    static void writeSettingsToFile(Context context, CTGeofenceSettings ctGeofenceSettings) {
+
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Writing new settings to file...");
+
+        JSONObject settings = new JSONObject();
+        try {
+            settings.put(CTGeofenceConstants.KEY_LAST_ACCURACY, ctGeofenceSettings.getLocationAccuracy());
+            settings.put(CTGeofenceConstants.KEY_LAST_FETCH_MODE, ctGeofenceSettings.getLocationFetchMode());
+            settings.put(CTGeofenceConstants.KEY_LAST_BG_LOCATION_UPDATES,
+                    ctGeofenceSettings.isBackgroundLocationUpdatesEnabled());
+            settings.put(CTGeofenceConstants.KEY_LAST_LOG_LEVEL, ctGeofenceSettings.getLogLevel().intValue());
+            settings.put(CTGeofenceConstants.KEY_ID, CTGeofenceAPI.getInstance(context).getAccountId());
+
+            boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
+                    CTGeofenceConstants.SETTINGS_FILE_NAME, settings);
+
+            if (writeJsonToFile) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "New settings successfully written to file");
+            } else {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Failed to write new settings to file");
+            }
+
+        } catch (JSONException e) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Failed to write new settings to file while parsing json");
+        }
+
+    }
+
+    static boolean initCTGeofenceApiIfRequired(Context context) {
+
+        CTGeofenceAPI ctGeofenceAPI = CTGeofenceAPI.getInstance(context);
+
+        if (ctGeofenceAPI.getGeofenceInterface() == null) {
+            CTGeofenceSettings ctGeofenceSettings = Utils.readSettingsFromFile(context);
+            if (ctGeofenceSettings == null) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Could not initialize CT instance! Dropping this call");
+                return false;
+            }
+
+            ctGeofenceAPI.setGeofenceSettings(ctGeofenceSettings);
+            CleverTapAPI.initGeofenceAPI(context, ctGeofenceSettings.getId(), ctGeofenceAPI);
+
+            if (ctGeofenceAPI.getGeofenceInterface()==null)
+            {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Critical issue :: After calling  CleverTapAPI.initGeofenceAPI also init is failed! Dropping this call");
+                return false;
+            }
+        }
+
+        return true;
     }
 }

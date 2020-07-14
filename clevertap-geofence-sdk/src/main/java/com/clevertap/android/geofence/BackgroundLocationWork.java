@@ -22,23 +22,45 @@ class BackgroundLocationWork extends ListenableWorker {
     @Override
     public ListenableFuture<Result> startWork() {
 
+        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                "Handling work in BackgroundLocationWork...");
+
         ListenableFuture<Result> listenableFuture = CallbackToFutureAdapter.getFuture(new CallbackToFutureAdapter.Resolver<Result>() {
             @Nullable
             @Override
             public Object attachCompleter(@NonNull final CallbackToFutureAdapter.Completer<Result> completer) throws Exception {
 
-                CTLocationCallback ctLocationCallback = new CTLocationCallback() {
+                final CTLocationCallback ctLocationCallback = new CTLocationCallback() {
                     @Override
                     public void onLocationComplete(Location location) {
                         CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
                                 .setLocationForGeofences(location);
 
                         completer.set(Result.success());
+
+                        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                "BackgroundLocationWork is finished");
                     }
                 };
 
-                CTGeofenceAPI.getInstance(getApplicationContext()).getCtLocationAdapter().getLastLocation(
-                        ctLocationCallback);
+                CTGeofenceTaskManager.getInstance().postAsyncSafely("ProcessLocationWork",
+                        new Runnable() {
+                            @Override
+                            public void run() {
+
+                                if (!Utils.initCTGeofenceApiIfRequired(getApplicationContext()))
+                                {
+                                    // if init fails then return without doing any work
+                                    completer.set(Result.success());
+                                    return;
+                                }
+
+                                CTGeofenceAPI.getInstance(getApplicationContext()).getCtLocationAdapter().getLastLocation(
+                                        ctLocationCallback);
+
+                            }
+                        });
+
 
                 return ctLocationCallback;
             }

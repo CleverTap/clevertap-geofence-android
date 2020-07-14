@@ -32,6 +32,12 @@ public class CTLocationUpdateService extends JobIntentService {
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Handling work in CTLocationUpdateService...");
 
+        if (!Utils.initCTGeofenceApiIfRequired(getApplicationContext()))
+        {
+            // if init fails then return without doing any work
+            return;
+        }
+
         int jobType = intent.getIntExtra(CTGeofenceConstants.EXTRA_JOB_SERVICE_TYPE, -1);
 
         if (jobType == CTGeofenceConstants.JOB_TYPE_DEVICE_BOOT) {

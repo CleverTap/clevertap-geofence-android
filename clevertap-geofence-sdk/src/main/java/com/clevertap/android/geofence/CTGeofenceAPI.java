@@ -11,7 +11,6 @@ import com.clevertap.android.geofence.interfaces.CTGeofenceInterface;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
-import com.clevertap.android.geofence.model.CTGeofenceSettings;
 
 import org.json.JSONObject;
 
@@ -35,9 +34,12 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
     private CTGeofenceAPI(Context context) {
         this.context = context.getApplicationContext();
-        logger = new Logger(Logger.LogLevel.DEBUG);
         ctLocationAdapter = CTLocationFactory.createLocationAdapter(this.context);
         ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(this.context);
+    }
+
+    static {
+        logger = new Logger(Logger.LogLevel.DEBUG);
     }
 
     @SuppressWarnings("WeakerAccess")

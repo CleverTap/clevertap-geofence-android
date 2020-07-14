@@ -1,4 +1,4 @@
-package com.clevertap.android.geofence.model;
+package com.clevertap.android.geofence;
 
 import com.clevertap.android.geofence.Logger.LogLevel;
 
@@ -9,6 +9,7 @@ public class CTGeofenceSettings {
     private final byte locationAccuracy;
     private final byte locationFetchMode; // WorkManager or BroadcastReceiver
     private final LogLevel logLevel;
+    private final String id;
 
     public static final byte ACCURACY_HIGH = 1;
     public static final byte ACCURACY_MEDIUM = 2;
@@ -23,6 +24,7 @@ public class CTGeofenceSettings {
         locationAccuracy = builder.locationAccuracy;
         locationFetchMode = builder.locationFetchMode;
         logLevel = builder.logLevel;
+        id = builder.id;
     }
 
     //TODO add comments for each method
@@ -32,6 +34,7 @@ public class CTGeofenceSettings {
         private byte locationAccuracy = ACCURACY_HIGH;
         private byte locationFetchMode = FETCH_LAST_LOCATION_PERIODIC;
         private LogLevel logLevel = LogLevel.DEBUG;
+        private String id;
 
         public Builder() {
 
@@ -57,6 +60,11 @@ public class CTGeofenceSettings {
             return this;
         }
 
+        CTGeofenceSettings.Builder setId(String id) {
+            this.id = id;
+            return this;
+        }
+
         public CTGeofenceSettings build() {
             CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings(this);
             return ctGeofenceSettings;
@@ -79,6 +87,9 @@ public class CTGeofenceSettings {
         return logLevel;
     }
 
+    String getId() {
+        return id;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -88,6 +99,7 @@ public class CTGeofenceSettings {
         return backgroundLocationUpdates == that.backgroundLocationUpdates &&
                 locationAccuracy == that.locationAccuracy &&
                 locationFetchMode == that.locationFetchMode &&
-                logLevel == that.logLevel;
+                logLevel == that.logLevel &&
+                id.equals(that.id);
     }
 }

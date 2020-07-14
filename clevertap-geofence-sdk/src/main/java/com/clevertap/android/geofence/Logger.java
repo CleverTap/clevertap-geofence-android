@@ -21,6 +21,23 @@ public final class Logger {
         public int intValue() {
             return value;
         }
+
+        public static LogLevel valueOf(int value) {
+            LogLevel logLevel = OFF;
+            switch (value) {
+                case 0:
+                    logLevel = INFO;
+                    break;
+                case 2:
+                    logLevel = DEBUG;
+                    break;
+                case 3:
+                    logLevel = VERBOSE;
+                    break;
+            }
+
+            return logLevel;
+        }
     }
 
     Logger(LogLevel level) {
