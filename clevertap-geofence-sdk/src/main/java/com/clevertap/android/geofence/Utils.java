@@ -1,7 +1,9 @@
 package com.clevertap.android.geofence;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import androidx.core.content.ContextCompat;
 
@@ -23,6 +25,18 @@ class Utils {
     static boolean hasPermission(final Context context, String permission) {
         try {
             return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(context, permission);
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    static boolean hasBackgroundLocationPermission(final Context context) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                return hasPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+            } else {
+                return true;
+            }
         } catch (Throwable t) {
             return false;
         }
@@ -198,8 +212,7 @@ class Utils {
             ctGeofenceAPI.setGeofenceSettings(ctGeofenceSettings);
             CleverTapAPI.initGeofenceAPI(context, ctGeofenceSettings.getId(), ctGeofenceAPI);
 
-            if (ctGeofenceAPI.getGeofenceInterface()==null)
-            {
+            if (ctGeofenceAPI.getGeofenceInterface() == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Critical issue :: After calling  CleverTapAPI.initGeofenceAPI also init is failed! Dropping this call");
                 return false;

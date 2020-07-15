@@ -28,7 +28,7 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
                 return;
             }
 
-            if (!Utils.hasPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            if (!Utils.hasBackgroundLocationPermission(context)) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "We don't have ACCESS_BACKGROUND_LOCATION permission! not registering " +
                                 "geofences and location updates after device reboot");

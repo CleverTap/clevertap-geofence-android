@@ -63,7 +63,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     public void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
 
         if (this.ctGeofenceSettings != null) {
-            throw new IllegalStateException("Settings already configured.");
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Settings already configured");
+            return;
         }
 
         this.ctGeofenceSettings = ctGeofenceSettings;
@@ -97,9 +99,9 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     @SuppressWarnings("unused")
     public void setAccountId(String accountId) {
 
-        if (accountId == null) {
+        if (accountId == null || accountId.isEmpty()) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Account Id is null");
+                    "Account Id is null or empty");
             return;
         }
 
@@ -245,6 +247,11 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
                             @Override
                             public void onLocationComplete(Location location) {
                                 //get's called on bg thread
+                                if (location!=null) {
+                                    logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                            "New Location = "+location.getLatitude()+","+
+                                            location.getLongitude());
+                                }
                                 ctGeofenceInterface.setLocationForGeofences(location);
                             }
                         });
@@ -267,7 +274,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
             return;
         }
 
-        if (!Utils.hasPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+        if (!Utils.hasBackgroundLocationPermission(context)) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_BACKGROUND_LOCATION permission! dropping geofence update call");
             return;

@@ -25,8 +25,8 @@ import static com.clevertap.android.geofence.CTGeofenceConstants.TAG_WORK_LOCATI
 
 class GoogleLocationAdapter implements CTLocationAdapter {
 
-    private static final long INTERVAL_IN_MILLIS = /*90 **/ 60 * 1000; // TODO: Exact values
-    private static final long INTERVAL_FASTEST_IN_MILLIS = /*90 **/ 60 * 1000;
+    private static final long INTERVAL_IN_MILLIS = /*90 **/ 1 * 60 * 1000; // TODO: Exact values
+    private static final long INTERVAL_FASTEST_IN_MILLIS = /*90 **/ 1 * 60 * 1000;
     private static final float SMALLEST_DISPLACEMENT_IN_METERS = 0;
     private static final long FLEX_INTERVAL_IN_MILLIS = 15 * 60 * 1000;
     private final Context context;

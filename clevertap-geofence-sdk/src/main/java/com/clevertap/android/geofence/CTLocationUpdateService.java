@@ -2,6 +2,7 @@ package com.clevertap.android.geofence;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
@@ -58,6 +59,13 @@ public class CTLocationUpdateService extends JobIntentService {
                     locationUpdateTask);
 
         } else {
+
+            Location location = LocationResult.extractResult(intent).getLastLocation();
+            if (location!=null) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "New Location = "+location.getLatitude()+","+ location.getLongitude());
+            }
+
             CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
                     .setLocationForGeofences(LocationResult.extractResult(intent).getLastLocation());
         }
