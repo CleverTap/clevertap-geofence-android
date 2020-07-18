@@ -4,6 +4,7 @@ import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.clevertap.android.geofence.CTGeofenceAPI.GEOFENCE_LOG_TAG;
 
@@ -40,7 +41,8 @@ class CTGeofenceTaskManager {
      * @param runnable Task to submit to queue
      */
     @SuppressWarnings("UnusedParameters")
-    void postAsyncSafely(final String name, final Runnable runnable) {
+    Future<?> postAsyncSafely(final String name, final Runnable runnable) {
+        Future<?> future = null;
         try {
             final boolean executeSync = Thread.currentThread().getId() == EXECUTOR_THREAD_ID;
 
@@ -49,7 +51,7 @@ class CTGeofenceTaskManager {
                 // no need to put it in queue
                 runnable.run();
             } else {
-                es.submit(new Runnable() {
+                future = es.submit(new Runnable() {
                     @Override
                     public void run() {
                         EXECUTOR_THREAD_ID = Thread.currentThread().getId();
@@ -64,6 +66,7 @@ class CTGeofenceTaskManager {
         } catch (Throwable t) {
             CTGeofenceAPI.getLogger().verbose(GEOFENCE_LOG_TAG, "Failed to submit task: " + name + " to the executor service", t);
         }
+        return future;
     }
 
     /**
@@ -74,7 +77,8 @@ class CTGeofenceTaskManager {
      * @param task Task to submit to queue
      */
     @SuppressWarnings("UnusedParameters")
-    void postAsyncSafely(final String name, final CTGeofenceTask task) {
+    Future<?> postAsyncSafely(final String name, final CTGeofenceTask task) {
+        Future<?> future = null;
         try {
             final boolean executeSync = Thread.currentThread().getId() == EXECUTOR_THREAD_ID;
 
@@ -83,7 +87,7 @@ class CTGeofenceTaskManager {
                 // no need to put it in queue
                 task.execute();
             } else {
-                es.submit(new Runnable() {
+                future = es.submit(new Runnable() {
                     @Override
                     public void run() {
                         EXECUTOR_THREAD_ID = Thread.currentThread().getId();
@@ -98,5 +102,7 @@ class CTGeofenceTaskManager {
         } catch (Throwable t) {
             CTGeofenceAPI.getLogger().verbose(GEOFENCE_LOG_TAG, "Failed to submit task: " + name + " to the executor service", t);
         }
+
+        return future;
     }
 }

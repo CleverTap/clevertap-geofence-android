@@ -4,11 +4,13 @@ import android.location.Location;
 
 import org.json.JSONObject;
 
+import java.util.concurrent.Future;
+
 public interface CTGeofenceInterface {
 
-    void setLocationForGeofences(Location location);
-    void pushGeofenceEnteredEvent(JSONObject object);
-    void pushGeoFenceExitedEvent(JSONObject object);
+    Future<?> setLocationForGeofences(Location location);
+    Future<?> pushGeofenceEnteredEvent(JSONObject object);
+    Future<?> pushGeoFenceExitedEvent(JSONObject object);
     void setGeoFenceCallback(CTGeofenceCallback callback);
 
 }

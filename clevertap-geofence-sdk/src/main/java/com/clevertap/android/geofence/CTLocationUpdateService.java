@@ -58,7 +58,7 @@ public class CTLocationUpdateService extends JobIntentService {
             CTGeofenceTaskManager.getInstance().postAsyncSafely("IntitializeLocationUpdatesOnBoot",
                     locationUpdateTask);
 
-        } else {
+        } /*else {
 
             Location location = LocationResult.extractResult(intent).getLastLocation();
             if (location!=null) {
@@ -68,7 +68,7 @@ public class CTLocationUpdateService extends JobIntentService {
 
             CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
                     .setLocationForGeofences(LocationResult.extractResult(intent).getLastLocation());
-        }
+        }*/
 
     }
 
