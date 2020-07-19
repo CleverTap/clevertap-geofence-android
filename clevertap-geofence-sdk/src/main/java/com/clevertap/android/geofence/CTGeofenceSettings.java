@@ -9,6 +9,7 @@ public class CTGeofenceSettings {
     private final byte locationAccuracy;
     private final byte locationFetchMode; // WorkManager or BroadcastReceiver
     private final LogLevel logLevel;
+    private final int geofenceMonitoringCount;
     private final String id;
 
     public static final byte ACCURACY_HIGH = 1;
@@ -18,12 +19,15 @@ public class CTGeofenceSettings {
     public static final byte FETCH_CURRENT_LOCATION_PERIODIC = 1; // BroadcastReceiver // current
     public static final byte FETCH_LAST_LOCATION_PERIODIC = 2; // Work Manager // call getLastLocation()
 
+    public static final int DEFAULT_GEO_MONITOR_COUNT = 50;
+
 
     private CTGeofenceSettings(Builder builder) {
         backgroundLocationUpdates = builder.backgroundLocationUpdates;
         locationAccuracy = builder.locationAccuracy;
         locationFetchMode = builder.locationFetchMode;
         logLevel = builder.logLevel;
+        geofenceMonitoringCount = builder.geofenceMonitoringCount;
         id = builder.id;
     }
 
@@ -34,6 +38,7 @@ public class CTGeofenceSettings {
         private byte locationAccuracy = ACCURACY_HIGH;
         private byte locationFetchMode = FETCH_LAST_LOCATION_PERIODIC;
         private LogLevel logLevel = LogLevel.DEBUG;
+        private int geofenceMonitoringCount = DEFAULT_GEO_MONITOR_COUNT;
         private String id;
 
         public Builder() {
@@ -57,6 +62,11 @@ public class CTGeofenceSettings {
 
         public CTGeofenceSettings.Builder setDebugLevel(LogLevel logLevel) {
             this.logLevel = logLevel;
+            return this;
+        }
+
+        public CTGeofenceSettings.Builder setGeofenceMonitoringCount(int geofenceMonitoringCount) {
+            this.geofenceMonitoringCount = geofenceMonitoringCount;
             return this;
         }
 
@@ -87,6 +97,10 @@ public class CTGeofenceSettings {
         return logLevel;
     }
 
+    public int getGeofenceMonitoringCount() {
+        return geofenceMonitoringCount;
+    }
+
     String getId() {
         return id;
     }
@@ -99,7 +113,7 @@ public class CTGeofenceSettings {
         return backgroundLocationUpdates == that.backgroundLocationUpdates &&
                 locationAccuracy == that.locationAccuracy &&
                 locationFetchMode == that.locationFetchMode &&
-                logLevel == that.logLevel &&
-                id.equals(that.id);
+                logLevel == that.logLevel && geofenceMonitoringCount == that.geofenceMonitoringCount
+                && id.equals(that.id);
     }
 }

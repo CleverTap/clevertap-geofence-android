@@ -146,6 +146,7 @@ class Utils {
                         .setLocationAccuracy((byte) jsonObject.getInt(CTGeofenceConstants.KEY_LAST_ACCURACY))
                         .setLocationFetchMode((byte) jsonObject.getInt(CTGeofenceConstants.KEY_LAST_FETCH_MODE))
                         .setDebugLevel(Logger.LogLevel.valueOf(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_LOG_LEVEL)))
+                        .setGeofenceMonitoringCount(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_GEO_COUNT))
                         .setId(jsonObject.getString(CTGeofenceConstants.KEY_ID))
                         .build();
 
@@ -177,6 +178,7 @@ class Utils {
             settings.put(CTGeofenceConstants.KEY_LAST_BG_LOCATION_UPDATES,
                     ctGeofenceSettings.isBackgroundLocationUpdatesEnabled());
             settings.put(CTGeofenceConstants.KEY_LAST_LOG_LEVEL, ctGeofenceSettings.getLogLevel().intValue());
+            settings.put(CTGeofenceConstants.KEY_LAST_GEO_COUNT, ctGeofenceSettings.getGeofenceMonitoringCount());
             settings.put(CTGeofenceConstants.KEY_ID, CTGeofenceAPI.getInstance(context).getAccountId());
 
             boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
@@ -220,5 +222,24 @@ class Utils {
         }
 
         return true;
+    }
+
+    static JSONArray subArray(JSONArray arr, int fromIndex, int toIndex) {
+
+        if (fromIndex > toIndex)
+            throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+
+        JSONArray jsonArray = new JSONArray();
+
+        try {
+            for (int i = fromIndex; i < toIndex; i++) {
+                jsonArray.put(arr.getJSONObject(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonArray;
+
     }
 }

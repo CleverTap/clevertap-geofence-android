@@ -54,10 +54,10 @@ public class CTLocationUpdateReceiver extends BroadcastReceiver {
                 thread.start();
             } else {
 
-                finishPendingIntent(result);
-
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Location Result is null");
+
+                finishPendingIntent(result);
             }
 
         } catch (Exception e) {

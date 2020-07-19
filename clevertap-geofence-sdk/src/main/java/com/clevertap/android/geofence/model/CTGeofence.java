@@ -89,7 +89,7 @@ public class CTGeofence {
         ArrayList<CTGeofence> geofenceList = new ArrayList<>();
 
         try {
-            JSONArray array = jsonObject.getJSONArray("geofences");
+            JSONArray array = jsonObject.getJSONArray(CTGeofenceConstants.KEY_GEOFENCES);
 
             for (int i = 0; i < array.length(); i++) {
 
