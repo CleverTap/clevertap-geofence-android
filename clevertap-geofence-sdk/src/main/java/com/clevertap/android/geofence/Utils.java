@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.annotation.WorkerThread;
 import androidx.core.content.ContextCompat;
 
 import com.clevertap.android.sdk.CleverTapAPI;
@@ -199,6 +200,7 @@ class Utils {
 
     }
 
+    @WorkerThread
     static boolean initCTGeofenceApiIfRequired(Context context) {
 
         CTGeofenceAPI ctGeofenceAPI = CTGeofenceAPI.getInstance(context);

@@ -12,7 +12,7 @@ import androidx.work.WorkerParameters;
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 
-class BackgroundLocationWork extends ListenableWorker {
+public class BackgroundLocationWork extends ListenableWorker {
 
     public BackgroundLocationWork(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
