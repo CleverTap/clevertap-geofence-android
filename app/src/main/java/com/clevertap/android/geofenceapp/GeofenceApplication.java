@@ -2,8 +2,8 @@ package com.clevertap.android.geofenceapp;
 
 import android.app.Application;
 
+import com.clevertap.android.geofence.CTGeofenceSettings;
 import com.clevertap.android.geofence.Logger;
-import com.clevertap.android.geofence.model.CTGeofenceSettings;
 import com.clevertap.android.sdk.ActivityLifecycleCallback;
 import com.clevertap.android.sdk.CleverTapAPI;
 

@@ -34,7 +34,7 @@ public class BackgroundLocationWork extends ListenableWorker {
                     @Override
                     public void onLocationComplete(Location location) {
                         CTGeofenceAPI.getInstance(getApplicationContext()).getGeofenceInterface()
-                                .setLocationForGeofences(location);
+                                .setLocationForGeofences(location,Utils.getGeofenceSDKVersion());
 
                         completer.set(Result.success());
 

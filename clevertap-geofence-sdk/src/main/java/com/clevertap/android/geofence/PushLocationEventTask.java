@@ -32,7 +32,7 @@ public class PushLocationEventTask implements CTGeofenceTask {
         try {
 
             Future<?> future = CTGeofenceAPI.getInstance(context).getGeofenceInterface()
-                    .setLocationForGeofences(locationResult.getLastLocation());
+                    .setLocationForGeofences(locationResult.getLastLocation(),Utils.getGeofenceSDKVersion());
 
             if (future == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -58,6 +58,6 @@ public class PushLocationEventTask implements CTGeofenceTask {
 
     @Override
     public void setOnCompleteListener(OnCompleteListener onCompleteListener) {
-
+        //TODO do we need this?
     }
 }

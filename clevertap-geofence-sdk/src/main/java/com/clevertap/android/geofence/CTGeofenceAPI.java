@@ -7,6 +7,7 @@ import android.location.Location;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.interfaces.CTGeofenceCallback;
+import com.clevertap.android.geofence.interfaces.CTGeofenceEventsListener;
 import com.clevertap.android.geofence.interfaces.CTGeofenceInterface;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
@@ -29,6 +30,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
     private CTGeofenceInterface ctGeofenceInterface;
     private boolean isActivated;
     private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
+    private CTGeofenceEventsListener ctGeofenceEventsListener;
     private String accountId;
     private String guid;
 
@@ -252,7 +254,7 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
                                             "New Location = "+location.getLatitude()+","+
                                             location.getLongitude());
                                 }
-                                ctGeofenceInterface.setLocationForGeofences(location);
+                                ctGeofenceInterface.setLocationForGeofences(location,Utils.getGeofenceSDKVersion());
                             }
                         });
                     }
@@ -298,6 +300,13 @@ public class CTGeofenceAPI implements CTGeofenceCallback {
 
     }
 
+    public CTGeofenceEventsListener getCtGeofenceEventsListener() {
+        return ctGeofenceEventsListener;
+    }
+
+    public void setCtGeofenceEventsListener(CTGeofenceEventsListener ctGeofenceEventsListener) {
+        this.ctGeofenceEventsListener = ctGeofenceEventsListener;
+    }
 
     CTGeofenceAdapter getCtGeofenceAdapter() {
         return ctGeofenceAdapter;

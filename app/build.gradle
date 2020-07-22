@@ -29,6 +29,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.9.0'//MANDATORY for App Inbox
     implementation 'com.android.installreferrer:installreferrer:1.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation project(path: ':clevertap-geofence-sdk')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

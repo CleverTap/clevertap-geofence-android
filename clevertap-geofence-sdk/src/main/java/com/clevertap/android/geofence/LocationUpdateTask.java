@@ -45,16 +45,14 @@ class LocationUpdateTask implements CTGeofenceTask {
         CTGeofenceSettings lastGeofenceSettings = Utils.readSettingsFromFile(context);
         if (lastGeofenceSettings!=null)
         {
-            lastAccuracy=lastGeofenceSettings.getLocationAccuracy();
-            lastFetchMode=lastGeofenceSettings.getLocationFetchMode();
+            lastAccuracy = lastGeofenceSettings.getLocationAccuracy();
+            lastFetchMode = lastGeofenceSettings.getLocationFetchMode();
         }
 
 
         // if background location disabled and if location update request is already registered then remove it
         if (!this.ctGeofenceSettings.isBackgroundLocationUpdatesEnabled() && locationPendingIntent != null) {
-
             ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
-
         } else if (this.ctGeofenceSettings.isBackgroundLocationUpdatesEnabled()
                 && (locationPendingIntent == null
                 || (currentAccuracy != lastAccuracy && currentFetchMode == CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC)

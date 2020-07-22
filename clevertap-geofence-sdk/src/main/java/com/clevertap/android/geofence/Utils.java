@@ -244,4 +244,8 @@ class Utils {
         return jsonArray;
 
     }
+
+    static int getGeofenceSDKVersion(){
+        return BuildConfig.VERSION_CODE;
+    }
 }

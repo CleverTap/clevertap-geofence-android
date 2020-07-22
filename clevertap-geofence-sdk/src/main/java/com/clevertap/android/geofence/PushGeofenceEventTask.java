@@ -141,9 +141,19 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
                             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                                 future = CTGeofenceAPI.getInstance(context).getGeofenceInterface()
                                         .pushGeofenceEnteredEvent(geofence);
+                                if(CTGeofenceAPI.getInstance(context).getCtGeofenceEventsListener() != null) {
+                                    CTGeofenceAPI.getInstance(context)
+                                            .getCtGeofenceEventsListener()
+                                            .onGeofenceEnteredEvent(geofence);
+                                }
                             } else {
                                 future = CTGeofenceAPI.getInstance(context).getGeofenceInterface()
                                         .pushGeoFenceExitedEvent(geofence);
+                                if(CTGeofenceAPI.getInstance(context).getCtGeofenceEventsListener() != null) {
+                                    CTGeofenceAPI.getInstance(context)
+                                            .getCtGeofenceEventsListener()
+                                            .onGeofenceExitedEvent(geofence);
+                                }
                             }
 
                             try {
