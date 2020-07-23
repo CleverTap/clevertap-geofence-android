@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -22,8 +21,6 @@ public class CTGeofenceReceiver extends BroadcastReceiver {
 
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Geofence receiver called");
-
-            //CTGeofenceService.enqueueWork(context.getApplicationContext(), intent);
 
             Thread thread = new Thread() {
                 public void run() {

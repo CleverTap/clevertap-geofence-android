@@ -110,10 +110,6 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
             };
             thread.start();
 
-            /*Intent jobIntent = new Intent();
-            jobIntent.putExtra(CTGeofenceConstants.EXTRA_JOB_SERVICE_TYPE,
-                    CTGeofenceConstants.JOB_TYPE_DEVICE_BOOT);
-            CTLocationUpdateService.enqueueWork(context.getApplicationContext(), jobIntent);*/
         }
 
     }

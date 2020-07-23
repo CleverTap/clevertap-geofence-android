@@ -70,7 +70,7 @@ public class CTGeofenceSettings {
             return this;
         }
 
-        CTGeofenceSettings.Builder setId(String id) {
+        public CTGeofenceSettings.Builder setId(String id) {
             this.id = id;
             return this;
         }
@@ -101,7 +101,7 @@ public class CTGeofenceSettings {
         return geofenceMonitoringCount;
     }
 
-    String getId() {
+    public String getId() {
         return id;
     }
 

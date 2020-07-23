@@ -151,6 +151,12 @@ class GoogleLocationAdapter implements CTLocationAdapter {
             // blocking task
             location = Tasks.await(lastLocation);
 
+            if (location!=null) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "New Location = "+location.getLatitude()+","+
+                                location.getLongitude());
+            }
+
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location request completed");
 
 

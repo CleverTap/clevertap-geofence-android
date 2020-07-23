@@ -205,7 +205,7 @@ class Utils {
 
         CTGeofenceAPI ctGeofenceAPI = CTGeofenceAPI.getInstance(context);
 
-        if (ctGeofenceAPI.getGeofenceInterface() == null) {
+        if (ctGeofenceAPI.getCleverTapApi() == null) {
             CTGeofenceSettings ctGeofenceSettings = Utils.readSettingsFromFile(context);
             if (ctGeofenceSettings == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -213,14 +213,15 @@ class Utils {
                 return false;
             }
 
-            ctGeofenceAPI.setGeofenceSettings(ctGeofenceSettings);
-            CleverTapAPI.initGeofenceAPI(context, ctGeofenceSettings.getId(), ctGeofenceAPI);
+            CleverTapAPI cleverTapAPI = CleverTapAPI.getGlobalInstance(context, ctGeofenceSettings.getId());
 
-            if (ctGeofenceAPI.getGeofenceInterface() == null) {
+            if (cleverTapAPI == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                        "Critical issue :: After calling  CleverTapAPI.initGeofenceAPI also init is failed! Dropping this call");
+                        "Critical issue :: After calling  CleverTapAPI.getGlobalInstance also init is failed! Dropping this call");
                 return false;
             }
+
+            ctGeofenceAPI.init(ctGeofenceSettings,cleverTapAPI);
         }
 
         return true;

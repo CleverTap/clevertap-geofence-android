@@ -139,7 +139,7 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
                             Future<?> future;
 
                             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                                future = CTGeofenceAPI.getInstance(context).getGeofenceInterface()
+                                future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
                                         .pushGeofenceEnteredEvent(geofence);
                                 if(CTGeofenceAPI.getInstance(context).getCtGeofenceEventsListener() != null) {
                                     CTGeofenceAPI.getInstance(context)
@@ -147,7 +147,7 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
                                             .onGeofenceEnteredEvent(geofence);
                                 }
                             } else {
-                                future = CTGeofenceAPI.getInstance(context).getGeofenceInterface()
+                                future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
                                         .pushGeoFenceExitedEvent(geofence);
                                 if(CTGeofenceAPI.getInstance(context).getCtGeofenceEventsListener() != null) {
                                     CTGeofenceAPI.getInstance(context)
