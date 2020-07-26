@@ -9,7 +9,9 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.work.ListenableWorker;
 import androidx.work.WorkerParameters;
 
+import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Future;
@@ -38,8 +40,14 @@ public class BackgroundLocationWork extends ListenableWorker {
 
                         // running on bg thread
 
-                        Future<?> future = CTGeofenceAPI.getInstance(getApplicationContext()).getCleverTapApi()
-                                .setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
+                        CleverTapAPI cleverTapApi = CTGeofenceAPI.getInstance(getApplicationContext())
+                                .getCleverTapApi();
+                        Future<?> future = null;
+
+                        if (cleverTapApi != null) {
+                            future = cleverTapApi
+                                    .setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
+                        }
 
                         try {
                             if (future != null) {
@@ -69,8 +77,14 @@ public class BackgroundLocationWork extends ListenableWorker {
                                     return;
                                 }
 
-                                CTGeofenceAPI.getInstance(getApplicationContext()).getCtLocationAdapter().getLastLocation(
-                                        ctLocationCallback);
+                                CTLocationAdapter ctLocationAdapter = CTGeofenceAPI
+                                        .getInstance(getApplicationContext()).getCtLocationAdapter();
+
+                                if (ctLocationAdapter!=null) {
+                                    ctLocationAdapter.getLastLocation(ctLocationCallback);
+                                } else {
+                                    completer.set(Result.success());
+                                }
 
                             }
                         });

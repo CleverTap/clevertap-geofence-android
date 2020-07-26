@@ -114,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
-                CTGeofenceAPI.getInstance(getApplicationContext()).onSuccess(jsonObject);
             } else {
                 // Permission denied.
 

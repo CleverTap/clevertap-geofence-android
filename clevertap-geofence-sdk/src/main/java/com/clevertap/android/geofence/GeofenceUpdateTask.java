@@ -2,6 +2,10 @@ package com.clevertap.android.geofence;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.model.CTGeofence;
@@ -18,18 +22,24 @@ import java.util.List;
 class GeofenceUpdateTask implements CTGeofenceTask {
 
     private final Context context;
+    @Nullable
     private final CTGeofenceAdapter ctGeofenceAdapter;
     private final JSONObject fenceList;
+    @Nullable
     private OnCompleteListener onCompleteListener;
 
-    GeofenceUpdateTask(Context context, JSONObject fenceList) {
+    GeofenceUpdateTask(Context context, @Nullable JSONObject fenceList) {
         this.context = context.getApplicationContext();
         this.fenceList = fenceList;
         ctGeofenceAdapter = CTGeofenceAPI.getInstance(this.context).getCtGeofenceAdapter();
     }
 
+    @WorkerThread
     @Override
     public void execute() {
+
+        if (ctGeofenceAdapter == null)
+            return;
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Executing GeofenceUpdateTask...");
@@ -40,7 +50,7 @@ class GeofenceUpdateTask implements CTGeofenceTask {
         String oldFenceListString = FileUtils.readFromFile(context,
                 FileUtils.getCachedFullPath(context, CTGeofenceConstants.CACHED_FILE_NAME));
 
-        if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
+        if (!oldFenceListString.trim().equals("")) {
 
             List<String> ctOldGeofenceIdList = null;
             JSONObject ctOldGeofenceObject = null;
@@ -81,11 +91,13 @@ class GeofenceUpdateTask implements CTGeofenceTask {
      * {@link com.clevertap.android.geofence.CTGeofenceSettings.Builder#setGeofenceMonitoringCount(int)}
      * and store it to file followed by registration through
      * {@link GoogleGeofenceAdapter#addAllGeofence(List, OnSuccessListener)}
+     *
      * @param geofenceObject json response containing list of geofences
      */
-    private void addGeofences(JSONObject geofenceObject) {
+    @WorkerThread
+    private void addGeofences(@Nullable JSONObject geofenceObject) {
 
-        if (geofenceObject == null) {
+        if (geofenceObject == null || ctGeofenceAdapter == null) {
             return;
         }
 
@@ -154,7 +166,7 @@ class GeofenceUpdateTask implements CTGeofenceTask {
     }
 
     @Override
-    public void setOnCompleteListener(OnCompleteListener onCompleteListener) {
+    public void setOnCompleteListener(@NonNull OnCompleteListener onCompleteListener) {
         this.onCompleteListener = onCompleteListener;
     }
 }

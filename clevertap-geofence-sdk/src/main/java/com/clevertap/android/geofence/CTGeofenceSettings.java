@@ -2,18 +2,22 @@ package com.clevertap.android.geofence;
 
 import com.clevertap.android.geofence.Logger.LogLevel;
 
+import static com.clevertap.android.geofence.Logger.DEBUG;
+
 public class CTGeofenceSettings {
 
 
     private final boolean backgroundLocationUpdates;
     private final byte locationAccuracy;
     private final byte locationFetchMode; // WorkManager or BroadcastReceiver
-    private final LogLevel logLevel;
+    private final @LogLevel int logLevel;
     private final int geofenceMonitoringCount;
     private final String id;
 
     public static final byte ACCURACY_HIGH = 1;
+    @SuppressWarnings("unused")
     public static final byte ACCURACY_MEDIUM = 2;
+    @SuppressWarnings("unused")
     public static final byte ACCURACY_LOW = 3;
 
     public static final byte FETCH_CURRENT_LOCATION_PERIODIC = 1; // BroadcastReceiver // current
@@ -37,7 +41,7 @@ public class CTGeofenceSettings {
         private boolean backgroundLocationUpdates = true;
         private byte locationAccuracy = ACCURACY_HIGH;
         private byte locationFetchMode = FETCH_LAST_LOCATION_PERIODIC;
-        private LogLevel logLevel = LogLevel.DEBUG;
+        private @LogLevel int logLevel = DEBUG;
         private int geofenceMonitoringCount = DEFAULT_GEO_MONITOR_COUNT;
         private String id;
 
@@ -60,7 +64,7 @@ public class CTGeofenceSettings {
             return this;
         }
 
-        public CTGeofenceSettings.Builder setDebugLevel(LogLevel logLevel) {
+        public CTGeofenceSettings.Builder setLogLevel(@LogLevel int logLevel) {
             this.logLevel = logLevel;
             return this;
         }
@@ -76,8 +80,7 @@ public class CTGeofenceSettings {
         }
 
         public CTGeofenceSettings build() {
-            CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings(this);
-            return ctGeofenceSettings;
+            return new CTGeofenceSettings(this);
         }
     }
 
@@ -93,7 +96,7 @@ public class CTGeofenceSettings {
         return backgroundLocationUpdates;
     }
 
-    public LogLevel getLogLevel() {
+    public @LogLevel int getLogLevel() {
         return logLevel;
     }
 

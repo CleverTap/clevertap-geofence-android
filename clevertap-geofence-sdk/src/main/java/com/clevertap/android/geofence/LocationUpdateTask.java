@@ -3,6 +3,10 @@ package com.clevertap.android.geofence;
 import android.app.PendingIntent;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 
@@ -15,9 +19,9 @@ import static android.app.PendingIntent.FLAG_NO_CREATE;
 class LocationUpdateTask implements CTGeofenceTask {
 
     private final Context context;
-    private final CTGeofenceSettings ctGeofenceSettings;
-    private final CTLocationAdapter ctLocationAdapter;
-    private OnCompleteListener onCompleteListener;
+    @Nullable private CTGeofenceSettings ctGeofenceSettings;
+    @Nullable private final CTLocationAdapter ctLocationAdapter;
+    @Nullable private OnCompleteListener onCompleteListener;
 
     LocationUpdateTask(Context context) {
         this.context = context.getApplicationContext();
@@ -25,8 +29,17 @@ class LocationUpdateTask implements CTGeofenceTask {
         ctLocationAdapter = CTGeofenceAPI.getInstance(this.context).getCtLocationAdapter();
     }
 
+    @WorkerThread
     @Override
     public void execute() {
+
+        if (ctLocationAdapter == null)
+            return;
+
+        if (ctGeofenceSettings == null)
+        {
+            ctGeofenceSettings = CTGeofenceAPI.getInstance(context).initDefaultConfig();
+        }
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Executing LocationUpdateTask...");
@@ -78,7 +91,7 @@ class LocationUpdateTask implements CTGeofenceTask {
     }
 
     @Override
-    public void setOnCompleteListener(OnCompleteListener onCompleteListener) {
+    public void setOnCompleteListener(@NonNull OnCompleteListener onCompleteListener) {
         this.onCompleteListener = onCompleteListener;
     }
 

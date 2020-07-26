@@ -4,13 +4,18 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.Nullable;
+
 class PendingIntentFactory {
 
     static final int PENDING_INTENT_LOCATION = 1;
     static final int PENDING_INTENT_GEOFENCE = 2;
 
+    @Nullable
+    static PendingIntent getPendingIntent(@Nullable Context context, int pendingIntentType, int flags) {
 
-    static PendingIntent getPendingIntent(Context context, int pendingIntentType, int flags) {
+        if (context == null)
+            return null;
 
         int broadcastSenderRequestCode;
         Intent intent;

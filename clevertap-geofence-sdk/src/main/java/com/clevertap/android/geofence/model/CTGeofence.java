@@ -1,5 +1,7 @@
 package com.clevertap.android.geofence.model;
 
+import androidx.annotation.NonNull;
+
 import com.clevertap.android.geofence.CTGeofenceAPI;
 import com.clevertap.android.geofence.CTGeofenceConstants;
 
@@ -8,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class CTGeofence {
@@ -39,7 +40,7 @@ public class CTGeofence {
             this.id = id;
         }
 
-        public CTGeofence.Builder setTransitionType(int transitionType) {
+        CTGeofence.Builder setTransitionType(int transitionType) {
             this.transitionType = transitionType;
             return this;
         }
@@ -84,7 +85,7 @@ public class CTGeofence {
         return radius;
     }
 
-    public static List<CTGeofence> from(JSONObject jsonObject) {
+    @NonNull public static List<CTGeofence> from(@NonNull JSONObject jsonObject) {
 
         ArrayList<CTGeofence> geofenceList = new ArrayList<>();
 

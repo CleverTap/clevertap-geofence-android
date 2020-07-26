@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.MainThread;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -13,8 +15,9 @@ import static com.clevertap.android.geofence.CTGeofenceAPI.GEOFENCE_LOG_TAG;
 
 public class CTGeofenceBootReceiver extends BroadcastReceiver {
 
-    private static final long BROADCAST_INTENT_TIME_MS = 2000;
+    private static final long BROADCAST_INTENT_TIME_MS = 3000;
 
+    @MainThread
     @Override
     public void onReceive(final Context context, Intent intent) {
 
@@ -23,7 +26,7 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
         CTGeofenceAPI.getLogger().debug(GEOFENCE_LOG_TAG, "onReceive called after " +
                 "device reboot");
 
-        if (intent == null) {
+        if (intent == null || intent.getAction() == null) {
             return;
         }
 
@@ -66,10 +69,12 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
                                 .postAsyncSafely("ProcessGeofenceUpdatesOnBoot", geofenceUpdateTask);
 
                         try {
-                            futureGeofence.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                            if (futureGeofence != null) {
+                                futureGeofence.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                            }
                         } catch (TimeoutException e) {
                             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                                    "Timeout geofence update task execution limit of 2 secs");
+                                    "Timeout geofence update task execution limit of 3 secs");
                         } catch (Exception e) {
                             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                     "Exception while executing geofence update task");
@@ -85,10 +90,12 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
                                 .postAsyncSafely("IntitializeLocationUpdatesOnBoot", locationUpdateTask);
 
                         try {
-                            futureLocation.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                            if (futureLocation != null) {
+                                futureLocation.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                            }
                         } catch (TimeoutException e) {
                             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                                    "Timeout location update task execution limit of 2 secs");
+                                    "Timeout location update task execution limit of 3 secs");
                         } catch (Exception e) {
                             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                     "Exception while executing location update task");

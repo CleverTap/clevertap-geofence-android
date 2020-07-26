@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.content.ContextCompat;
 
@@ -31,6 +33,7 @@ class Utils {
         }
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     static boolean hasBackgroundLocationPermission(final Context context) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -48,7 +51,7 @@ class Utils {
      *
      * @return <code>true</code> if available, otherwise <code>false</code>.
      */
-    static boolean isPlayServicesDependencyAvailable() {
+    private static boolean isPlayServicesDependencyAvailable() {
 
         if (isPlayServicesDependencyAvailable == null) {//use reflection only once
             // Play Services
@@ -91,6 +94,7 @@ class Utils {
      *
      * @return <code>true</code> if available, otherwise <code>false</code>.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     static boolean isConcurrentFuturesDependencyAvailable() {
 
         if (isConcurrentFuturesDependencyAvailable == null) {//use reflection only once
@@ -110,7 +114,7 @@ class Utils {
         return str == null ? "" : str;
     }
 
-    static List<String> jsonToGeoFenceList(JSONObject jsonObject) {
+    static List<String> jsonToGeoFenceList(@NonNull JSONObject jsonObject) {
         ArrayList<String> geofenceIdList = new ArrayList<>();
         try {
             JSONArray array = jsonObject.getJSONArray("geofences");
@@ -128,8 +132,9 @@ class Utils {
         return geofenceIdList;
     }
 
-
-    static CTGeofenceSettings readSettingsFromFile(Context context) {
+    @WorkerThread
+    @Nullable
+    static CTGeofenceSettings readSettingsFromFile(@NonNull Context context) {
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Reading settings from file...");
@@ -138,7 +143,7 @@ class Utils {
 
         String settingsString = FileUtils.readFromFile(context,
                 FileUtils.getCachedFullPath(context, CTGeofenceConstants.SETTINGS_FILE_NAME));
-        if (settingsString != null && !settingsString.trim().equals("")) {
+        if (!settingsString.trim().equals("")) {
             try {
                 JSONObject jsonObject = new JSONObject(settingsString);
 
@@ -146,7 +151,7 @@ class Utils {
                         .enableBackgroundLocationUpdates(jsonObject.getBoolean(CTGeofenceConstants.KEY_LAST_BG_LOCATION_UPDATES))
                         .setLocationAccuracy((byte) jsonObject.getInt(CTGeofenceConstants.KEY_LAST_ACCURACY))
                         .setLocationFetchMode((byte) jsonObject.getInt(CTGeofenceConstants.KEY_LAST_FETCH_MODE))
-                        .setDebugLevel(Logger.LogLevel.valueOf(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_LOG_LEVEL)))
+                        .setLogLevel(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_LOG_LEVEL))
                         .setGeofenceMonitoringCount(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_GEO_COUNT))
                         .setId(jsonObject.getString(CTGeofenceConstants.KEY_ID))
                         .build();
@@ -167,7 +172,8 @@ class Utils {
 
     }
 
-    static void writeSettingsToFile(Context context, CTGeofenceSettings ctGeofenceSettings) {
+    @WorkerThread
+    static void writeSettingsToFile(Context context,@NonNull CTGeofenceSettings ctGeofenceSettings) {
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Writing new settings to file...");
@@ -178,7 +184,7 @@ class Utils {
             settings.put(CTGeofenceConstants.KEY_LAST_FETCH_MODE, ctGeofenceSettings.getLocationFetchMode());
             settings.put(CTGeofenceConstants.KEY_LAST_BG_LOCATION_UPDATES,
                     ctGeofenceSettings.isBackgroundLocationUpdatesEnabled());
-            settings.put(CTGeofenceConstants.KEY_LAST_LOG_LEVEL, ctGeofenceSettings.getLogLevel().intValue());
+            settings.put(CTGeofenceConstants.KEY_LAST_LOG_LEVEL, ctGeofenceSettings.getLogLevel());
             settings.put(CTGeofenceConstants.KEY_LAST_GEO_COUNT, ctGeofenceSettings.getGeofenceMonitoringCount());
             settings.put(CTGeofenceConstants.KEY_ID, CTGeofenceAPI.getInstance(context).getAccountId());
 
@@ -200,8 +206,9 @@ class Utils {
 
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @WorkerThread
-    static boolean initCTGeofenceApiIfRequired(Context context) {
+    static boolean initCTGeofenceApiIfRequired(@NonNull Context context) {
 
         CTGeofenceAPI ctGeofenceAPI = CTGeofenceAPI.getInstance(context);
 
@@ -227,7 +234,7 @@ class Utils {
         return true;
     }
 
-    static JSONArray subArray(JSONArray arr, int fromIndex, int toIndex) {
+    @NonNull static JSONArray subArray(@NonNull JSONArray arr, int fromIndex, int toIndex) {
 
         if (fromIndex > toIndex)
             throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");

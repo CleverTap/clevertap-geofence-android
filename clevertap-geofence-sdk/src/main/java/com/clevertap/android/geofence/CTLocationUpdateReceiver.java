@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
+
 import com.google.android.gms.location.LocationResult;
 
 import java.util.concurrent.Future;
@@ -12,8 +15,9 @@ import java.util.concurrent.TimeoutException;
 
 public class CTLocationUpdateReceiver extends BroadcastReceiver {
 
-    private static final long BROADCAST_INTENT_TIME_MS = 5000;
+    private static final long BROADCAST_INTENT_TIME_MS = 8000;
 
+    @MainThread
     @Override
     public void onReceive(final Context context, final Intent intent) {
 
@@ -37,7 +41,9 @@ public class CTLocationUpdateReceiver extends BroadcastReceiver {
                                 .postAsyncSafely("PushLocationEvent", pushLocationEventTask);
 
                         try {
-                            future.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                            if (future != null) {
+                                future.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                            }
                         } catch (TimeoutException e) {
                             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                     "Timeout location receiver execution limit of 10 secs");
@@ -74,7 +80,7 @@ public class CTLocationUpdateReceiver extends BroadcastReceiver {
 
     }
 
-    private void finishPendingIntent(PendingResult result) {
+    private void finishPendingIntent(@Nullable PendingResult result) {
         if (result != null) {
             result.finish();
 

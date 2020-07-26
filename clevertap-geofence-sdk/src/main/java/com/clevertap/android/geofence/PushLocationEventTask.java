@@ -2,22 +2,29 @@ package com.clevertap.android.geofence;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.google.android.gms.location.LocationResult;
 
 import java.util.concurrent.Future;
 
-public class PushLocationEventTask implements CTGeofenceTask {
+class PushLocationEventTask implements CTGeofenceTask {
 
     private final Context context;
+    @NonNull
     private final LocationResult locationResult;
+    @Nullable
     private OnCompleteListener onCompleteListener;
 
-    PushLocationEventTask(Context context, LocationResult locationResult) {
+    PushLocationEventTask(Context context, @NonNull LocationResult locationResult) {
         this.context = context.getApplicationContext();
         this.locationResult = locationResult;
     }
 
+    @WorkerThread
     @Override
     public void execute() {
 
@@ -26,13 +33,15 @@ public class PushLocationEventTask implements CTGeofenceTask {
 
         if (!Utils.initCTGeofenceApiIfRequired(context)) {
             // if init fails then return without doing any work
+            sendOnCompleteEvent();
             return;
         }
 
         try {
 
-            Future<?> future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
-                    .setLocationForGeofences(locationResult.getLastLocation(),Utils.getGeofenceSDKVersion());
+            @SuppressWarnings("ConstantConditions") //getCleverTapApi() won't be null here
+                    Future<?> future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
+                    .setLocationForGeofences(locationResult.getLastLocation(), Utils.getGeofenceSDKVersion());
 
             if (future == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -51,13 +60,21 @@ public class PushLocationEventTask implements CTGeofenceTask {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to push location event to CT");
             e.printStackTrace();
+        } finally {
+            sendOnCompleteEvent();
         }
 
 
     }
 
-    @Override
-    public void setOnCompleteListener(OnCompleteListener onCompleteListener) {
+    private void sendOnCompleteEvent() {
+        if (onCompleteListener != null) {
+            onCompleteListener.onComplete();
+        }
+    }
 
+    @Override
+    public void setOnCompleteListener(@NonNull OnCompleteListener onCompleteListener) {
+        this.onCompleteListener = onCompleteListener;
     }
 }

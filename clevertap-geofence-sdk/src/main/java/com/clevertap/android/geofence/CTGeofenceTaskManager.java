@@ -1,5 +1,7 @@
 package com.clevertap.android.geofence;
 
+import androidx.annotation.Nullable;
+
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 
 import java.util.concurrent.ExecutorService;
@@ -41,6 +43,7 @@ class CTGeofenceTaskManager {
      * @param runnable Task to submit to queue
      */
     @SuppressWarnings("UnusedParameters")
+    @Nullable
     Future<?> postAsyncSafely(final String name, final Runnable runnable) {
         Future<?> future = null;
         try {
@@ -77,6 +80,7 @@ class CTGeofenceTaskManager {
      * @param task Task to submit to queue
      */
     @SuppressWarnings("UnusedParameters")
+    @Nullable
     Future<?> postAsyncSafely(final String name, final CTGeofenceTask task) {
         Future<?> future = null;
         try {

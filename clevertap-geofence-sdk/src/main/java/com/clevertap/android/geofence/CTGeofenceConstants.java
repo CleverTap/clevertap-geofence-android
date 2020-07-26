@@ -2,9 +2,6 @@ package com.clevertap.android.geofence;
 
 public class CTGeofenceConstants {
 
-    static final String EXTRA_JOB_SERVICE_TYPE = "job_service_type";
-    static final int JOB_TYPE_DEVICE_BOOT = 1;
-
     static final String CACHED_DIR_NAME = "geofence";
     static final String CACHED_FILE_NAME = "geofence_cache.json";
     static final String SETTINGS_FILE_NAME = "geofence_settings.json";

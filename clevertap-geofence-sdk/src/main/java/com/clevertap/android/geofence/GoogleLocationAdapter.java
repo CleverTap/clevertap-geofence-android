@@ -4,6 +4,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
@@ -35,7 +37,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     private int locationFetchMode;
     private int locationAccuracy = LocationRequest.PRIORITY_HIGH_ACCURACY;
 
-    GoogleLocationAdapter(Context context) {
+    GoogleLocationAdapter(@NonNull Context context) {
         this.context = context.getApplicationContext();
         fusedProviderClient = LocationServices.getFusedLocationProviderClient(this.context);
     }
@@ -128,19 +130,15 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
     @WorkerThread
     @Override
-    public void removeLocationUpdates(PendingIntent pendingIntent) {
+    public void removeLocationUpdates(@Nullable PendingIntent pendingIntent) {
         clearLocationUpdates(pendingIntent);
         clearLocationWorkRequest();
     }
 
     @WorkerThread
     @Override
-    public void getLastLocation(final CTLocationCallback callback) {
+    public void getLastLocation(@NonNull final CTLocationCallback callback) {
         //thread safe
-
-        if (callback == null) {
-            throw new IllegalArgumentException("location callback can not be null");
-        }
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Requesting Last Location..");
 
@@ -159,24 +157,6 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location request completed");
 
-
-            /*lastLocation.addOnCompleteListener(new OnCompleteListener<Location>() {
-                @Override
-                public void onComplete(@NonNull Task<Location> task) {
-                    try {
-                        // get's called on main thread
-                        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Last location fetch completed");
-                        Location lastLocation = task.getResult();
-                        callback.onLocationComplete(lastLocation);
-
-                    } catch (Exception e) {
-                        CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                                "Failed to request last location");
-                        e.printStackTrace();
-                    }
-
-                }
-            });*/
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to request last location");
@@ -198,11 +178,17 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     }
 
     private void applySettings(Context context) {
-        locationFetchMode = CTGeofenceAPI.getInstance(context).getGeofenceSettings().getLocationFetchMode();
-        backgroundLocationUpdatesEnabled = CTGeofenceAPI.getInstance(context).getGeofenceSettings()
-                .isBackgroundLocationUpdatesEnabled();
+        CTGeofenceSettings geofenceSettings = CTGeofenceAPI.getInstance(context).getGeofenceSettings();
 
-        int accuracy = CTGeofenceAPI.getInstance(context).getGeofenceSettings().getLocationAccuracy();
+        if (geofenceSettings == null)
+        {
+            geofenceSettings =  CTGeofenceAPI.getInstance(context).initDefaultConfig();
+        }
+
+        locationFetchMode = geofenceSettings.getLocationFetchMode();
+        backgroundLocationUpdatesEnabled = geofenceSettings.isBackgroundLocationUpdatesEnabled();
+
+        int accuracy = geofenceSettings.getLocationAccuracy();
         switch (accuracy) {
             case 1:
                 locationAccuracy = LocationRequest.PRIORITY_HIGH_ACCURACY;
@@ -244,7 +230,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     }
 
     @WorkerThread
-    private void clearLocationUpdates(PendingIntent pendingIntent) {
+    private void clearLocationUpdates(@Nullable PendingIntent pendingIntent) {
         if (pendingIntent == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Can't stop location updates since provided pendingIntent is null");

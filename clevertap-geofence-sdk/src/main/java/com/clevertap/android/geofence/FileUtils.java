@@ -3,6 +3,10 @@ package com.clevertap.android.geofence;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -15,7 +19,8 @@ import java.io.InputStreamReader;
 @SuppressWarnings("WeakerAccess")
 public class FileUtils {
 
-    static boolean writeJsonToFile(Context context, String dirName, String fileName, JSONObject jsonObject) {
+    @WorkerThread
+    static boolean writeJsonToFile(Context context, String dirName, String fileName, @Nullable JSONObject jsonObject) {
         boolean isWriteSuccessful = false;
         try {
             if (jsonObject == null || TextUtils.isEmpty(dirName) || TextUtils.isEmpty(fileName))
@@ -43,6 +48,8 @@ public class FileUtils {
         return isWriteSuccessful;
     }
 
+    @WorkerThread
+    @NonNull
     static String readFromFile(Context context, String fileNameWithPath) {
 
         String content = "";
@@ -79,8 +86,8 @@ public class FileUtils {
         return content;
     }
 
+    @WorkerThread
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    //TODO Do we need this?
     static void deleteDirectory(Context context, String dirName) {
         if (TextUtils.isEmpty(dirName) || context == null)
             return;

@@ -2,13 +2,15 @@ package com.clevertap.android.geofence;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
 class CTLocationFactory {
 
-    static CTLocationAdapter createLocationAdapter(Context context) {
+    static CTLocationAdapter createLocationAdapter(@NonNull Context context) {
 
         int googlePlayServicesAvailable = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);
 
@@ -23,18 +25,11 @@ class CTLocationFactory {
             } else {
 
                 String errorString = GoogleApiAvailability.getInstance().getErrorString(googlePlayServicesAvailable);
-
-                if (errorString!=null) {
-                    CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                            "Play service APK error :: " +errorString);
-                }
-                return new AndroidLocationAdapter(context.getApplicationContext());
+                throw new IllegalStateException("Play service APK error :: " + errorString);
             }
 
         } else {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "FusedLocationApi dependency is not available");
-            return new AndroidLocationAdapter(context.getApplicationContext());
+            throw new IllegalStateException("play-services-location dependency is missing");
         }
     }
 }

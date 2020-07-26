@@ -5,6 +5,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.interfaces.CTGeofenceEventsListener;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
@@ -24,30 +28,42 @@ public class CTGeofenceAPI implements GeofenceCallback {
     private static CTGeofenceAPI ctGeofenceAPI;
     private final Context context;
     private static Logger logger;
-    private final CTLocationAdapter ctLocationAdapter;
-    private final CTGeofenceAdapter ctGeofenceAdapter;
+    @Nullable
+    private CTLocationAdapter ctLocationAdapter;
+    @Nullable
+    private CTGeofenceAdapter ctGeofenceAdapter;
 
+    @Nullable
     private CTGeofenceSettings ctGeofenceSettings;
+    @Nullable
     private CleverTapAPI cleverTapAPI;
     private boolean isActivated;
-    private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
-    private CTGeofenceEventsListener ctGeofenceEventsListener;
+    @Nullable private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
+    @Nullable private CTGeofenceEventsListener ctGeofenceEventsListener;
     private String accountId;
-    private String guid;
 
     private CTGeofenceAPI(Context context) {
         this.context = context.getApplicationContext();
         com.orhanobut.logger.Logger.addLogAdapter(new DiskLogAdapter(this.context));
-        ctLocationAdapter = CTLocationFactory.createLocationAdapter(this.context);
-        ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(this.context);
+
+        try {
+            ctLocationAdapter = CTLocationFactory.createLocationAdapter(this.context);
+            ctGeofenceAdapter = CTGeofenceFactory.createGeofenceAdapter(this.context);
+        } catch (IllegalStateException e) {
+            if (e.getMessage() != null) {
+                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        e.getMessage());
+            }
+        }
     }
 
     static {
-        logger = new Logger(Logger.LogLevel.DEBUG);
+        logger = new Logger(Logger.DEBUG);
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static CTGeofenceAPI getInstance(Context context) {
+    @NonNull
+    public static CTGeofenceAPI getInstance(@NonNull Context context) {
         if (ctGeofenceAPI == null) {
             synchronized (CTGeofenceAPI.class) {
                 if (ctGeofenceAPI == null) {
@@ -59,7 +75,12 @@ public class CTGeofenceAPI implements GeofenceCallback {
     }
 
 
-    public void init(CTGeofenceSettings ctGeofenceSettings, CleverTapAPI cleverTapAPI){
+    public void init(CTGeofenceSettings ctGeofenceSettings, @NonNull CleverTapAPI cleverTapAPI) {
+
+        if (ctLocationAdapter == null || ctGeofenceAdapter == null) {
+            return;
+        }
+
         setCleverTapApi(cleverTapAPI);
         setGeofenceSettings(ctGeofenceSettings);
         setAccountId(cleverTapAPI.getAccountId());
@@ -72,7 +93,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
      * @param ctGeofenceSettings - Object of {@link CTGeofenceSettings}
      */
     @SuppressWarnings("unused")
-    void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
+    private void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
 
         if (this.ctGeofenceSettings != null) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -85,7 +106,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
 
     @SuppressWarnings("unused")
-    void setCleverTapApi(CleverTapAPI cleverTapAPI) {
+    private void setCleverTapApi(CleverTapAPI cleverTapAPI) {
         this.cleverTapAPI = cleverTapAPI;
     }
 
@@ -95,7 +116,8 @@ public class CTGeofenceAPI implements GeofenceCallback {
      * @param onGeofenceApiInitializedListener - Object of {@link OnGeofenceApiInitializedListener}
      */
     @SuppressWarnings("unused")
-    public void setOnGeofenceApiInitializedListener(OnGeofenceApiInitializedListener onGeofenceApiInitializedListener) {
+    public void setOnGeofenceApiInitializedListener(
+            @NonNull OnGeofenceApiInitializedListener onGeofenceApiInitializedListener) {
         this.onGeofenceApiInitializedListener = onGeofenceApiInitializedListener;
     }
 
@@ -105,7 +127,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
      * @param accountId clevertap account id
      */
     @SuppressWarnings("unused")
-    void setAccountId(String accountId) {
+    private void setAccountId(String accountId) {
 
         if (accountId == null || accountId.isEmpty()) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -122,16 +144,16 @@ public class CTGeofenceAPI implements GeofenceCallback {
      * reading config settings if provided or will use default settings.
      */
     @SuppressWarnings("unused")
-    void activate() {
+    private void activate() {
+
+        if (ctLocationAdapter == null || ctGeofenceAdapter == null || cleverTapAPI == null) {
+            return;
+        }
 
         if (isActivated) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Geofence API already activated! dropping activate() call");
             return;
-        }
-
-        if (cleverTapAPI == null) {
-            throw new IllegalStateException("CleverTap instance is null");
         }
 
         if (ctGeofenceSettings == null) {
@@ -151,6 +173,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
     @SuppressWarnings("WeakerAccess")
     public void initBackgroundLocationUpdates() {
 
+        if (ctLocationAdapter == null || ctGeofenceAdapter == null) {
+            return;
+        }
+
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_FINE_LOCATION permission! Dropping initBackgroundLocationUpdates() call");
@@ -162,7 +188,6 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
         if (!isActivated) {
             throw new IllegalStateException("Geofence SDK must be initialized before initBackgroundLocationUpdates()");
-            //TODO: app is not calling activate() in any case, so this logging needs to change
         }
 
         LocationUpdateTask locationUpdateTask = new LocationUpdateTask(context);
@@ -186,6 +211,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
     @SuppressWarnings("unused")
     public void deactivate() {
 
+        if (ctLocationAdapter == null || ctGeofenceAdapter == null) {
+            return;
+        }
+
         //  TODO: clean up resources
         CTGeofenceTaskManager.getInstance().postAsyncSafely("DeactivateApi", new Runnable() {
             @Override
@@ -201,7 +230,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
                 ctLocationAdapter.removeLocationUpdates(locationPendingIntent);
 
                 // delete cached files
-                FileUtils.deleteDirectory(context,FileUtils.getCachedDirName(context));
+                FileUtils.deleteDirectory(context, FileUtils.getCachedDirName(context));
 
                 isActivated = false;
             }
@@ -210,8 +239,14 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Override
     public void handleGeoFences(JSONObject fenceList) {
+
+        if (ctLocationAdapter == null || ctGeofenceAdapter == null) {
+            return;
+        }
+
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_FINE_LOCATION permission! dropping geofence update call");
@@ -258,6 +293,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
     @Override
     public void triggerLocation() {
 
+        if (ctLocationAdapter == null || ctGeofenceAdapter == null || cleverTapAPI == null) {
+            return;
+        }
+
         logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "triggerLocation() called");
 
@@ -280,7 +319,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
                             @Override
                             public void onLocationComplete(Location location) {
                                 //get's called on bg thread
-                                cleverTapAPI.setLocationForGeofences(location,Utils.getGeofenceSDKVersion());
+                                cleverTapAPI.setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
                             }
                         });
                     }
@@ -289,32 +328,38 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
     }
 
-    private CTGeofenceSettings initDefaultConfig() {
+    @NonNull
+    CTGeofenceSettings initDefaultConfig() {
         return new CTGeofenceSettings.Builder().build();
     }
 
+    @Nullable
     public CTGeofenceEventsListener getCtGeofenceEventsListener() {
         return ctGeofenceEventsListener;
     }
 
-    public void setCtGeofenceEventsListener(CTGeofenceEventsListener ctGeofenceEventsListener) {
+    public void setCtGeofenceEventsListener(@NonNull CTGeofenceEventsListener ctGeofenceEventsListener) {
         this.ctGeofenceEventsListener = ctGeofenceEventsListener;
     }
 
+    @Nullable
     CTGeofenceAdapter getCtGeofenceAdapter() {
         return ctGeofenceAdapter;
     }
 
+    @Nullable
     CTLocationAdapter getCtLocationAdapter() {
         return ctLocationAdapter;
     }
 
+    @Nullable
     CleverTapAPI getCleverTapApi() {
         return cleverTapAPI;
     }
 
     @SuppressWarnings("WeakerAccess")
-    public CTGeofenceSettings getGeofenceSettings() {
+    public @Nullable
+    CTGeofenceSettings getGeofenceSettings() {
         return ctGeofenceSettings;
     }
 
@@ -326,6 +371,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
         void OnGeofenceApiInitialized();
     }
 
+    @NonNull
     String getAccountId() {
         return Utils.emptyIfNull(accountId);
     }

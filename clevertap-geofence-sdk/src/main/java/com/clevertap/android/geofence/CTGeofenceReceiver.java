@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.MainThread;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -12,6 +14,7 @@ public class CTGeofenceReceiver extends BroadcastReceiver {
 
     private static final long BROADCAST_INTENT_TIME_MS = 8000;
 
+    @MainThread
     @Override
     public void onReceive(final Context context, final Intent intent) {
 
@@ -30,8 +33,10 @@ public class CTGeofenceReceiver extends BroadcastReceiver {
                             pushGeofenceEventTask);
 
                     try {
-                        future.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
-                    }catch (TimeoutException e) {
+                        if (future != null) {
+                            future.get(BROADCAST_INTENT_TIME_MS, TimeUnit.MILLISECONDS);
+                        }
+                    } catch (TimeoutException e) {
                         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                 "Timeout geofence receiver execution limit of 10 secs");
                     } catch (Exception e) {
@@ -50,8 +55,7 @@ public class CTGeofenceReceiver extends BroadcastReceiver {
             };
             thread.start();
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 
             if (result != null) {
                 result.finish();

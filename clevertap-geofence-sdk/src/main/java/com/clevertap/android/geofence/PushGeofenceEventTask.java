@@ -4,7 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
+import com.clevertap.android.geofence.interfaces.CTGeofenceEventsListener;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
@@ -15,10 +21,11 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.concurrent.Future;
 
-public class PushGeofenceEventTask implements CTGeofenceTask {
+class PushGeofenceEventTask implements CTGeofenceTask {
 
     private final Context context;
     private final Intent intent;
+    @Nullable
     private OnCompleteListener onCompleteListener;
 
     PushGeofenceEventTask(Context context, Intent intent) {
@@ -26,7 +33,7 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
         this.intent = intent;
     }
 
-
+    @WorkerThread
     @Override
     public void execute() {
 
@@ -42,7 +49,6 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 
-        //TODO Do we need null check?
         if (geofencingEvent == null || geofencingEvent.hasError()) {
             String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -92,10 +98,10 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
      * @param triggeringLocation  - {@link Location} object
      * @param geofenceTransition  - int value of geofence transition event
      */
-    private void pushGeofenceEvents(List<Geofence> triggeringGeofences, Location triggeringLocation,
+    @WorkerThread
+    private void pushGeofenceEvents(@Nullable List<Geofence> triggeringGeofences, @Nullable Location triggeringLocation,
                                     int geofenceTransition) {
 
-        //TODO: Finalize contract for geofence trigger event
         if (triggeringGeofences == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "fetched triggered geofence list is null");
@@ -106,7 +112,7 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
         // Search triggered geofences in file by id and send stored geofence object to CT SDK
         String oldFenceListString = FileUtils.readFromFile(context,
                 FileUtils.getCachedFullPath(context, CTGeofenceConstants.CACHED_FILE_NAME));
-        if (oldFenceListString != null && !oldFenceListString.trim().equals("")) {
+        if (!oldFenceListString.trim().equals("")) {
 
             JSONObject jsonObject;
             try {
@@ -133,26 +139,31 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
 
                             isTriggeredGeofenceFound = true;
 
-                            geofence.put("triggered_lat", triggeringLocation.getLatitude());
-                            geofence.put("triggered_lng", triggeringLocation.getLongitude());
+                            if (triggeringLocation != null) {
+                                geofence.put("triggered_lat", triggeringLocation.getLatitude());
+                                geofence.put("triggered_lng", triggeringLocation.getLongitude());
+                            }
 
                             Future<?> future;
 
+                            CleverTapAPI cleverTapApi = CTGeofenceAPI.getInstance(context).getCleverTapApi();
+
+                            if (cleverTapApi == null) {
+                                return;
+                            }
+
+                            CTGeofenceEventsListener ctGeofenceEventsListener = CTGeofenceAPI
+                                    .getInstance(context).getCtGeofenceEventsListener();
+
                             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                                future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
-                                        .pushGeofenceEnteredEvent(geofence);
-                                if(CTGeofenceAPI.getInstance(context).getCtGeofenceEventsListener() != null) {
-                                    CTGeofenceAPI.getInstance(context)
-                                            .getCtGeofenceEventsListener()
-                                            .onGeofenceEnteredEvent(geofence);
+                                future = cleverTapApi.pushGeofenceEnteredEvent(geofence);
+                                if (ctGeofenceEventsListener != null) {
+                                    ctGeofenceEventsListener.onGeofenceEnteredEvent(geofence);
                                 }
                             } else {
-                                future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
-                                        .pushGeoFenceExitedEvent(geofence);
-                                if(CTGeofenceAPI.getInstance(context).getCtGeofenceEventsListener() != null) {
-                                    CTGeofenceAPI.getInstance(context)
-                                            .getCtGeofenceEventsListener()
-                                            .onGeofenceExitedEvent(geofence);
+                                future = cleverTapApi.pushGeoFenceExitedEvent(geofence);
+                                if (ctGeofenceEventsListener != null) {
+                                    ctGeofenceEventsListener.onGeofenceExitedEvent(geofence);
                                 }
                             }
 
@@ -165,8 +176,7 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
                                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                         "Finished calling future for geofence event with id = " +
                                                 triggeredGeofence.getRequestId());
-                            } catch (Exception e)
-                            {
+                            } catch (Exception e) {
                                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                         "Failed to push geofence event with id = " +
                                                 triggeredGeofence.getRequestId());
@@ -174,7 +184,6 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
                             }
 
                             break;
-                            //TODO add some verbose logging here to help us debug prod issues
                         }
                     }
 
@@ -194,7 +203,7 @@ public class PushGeofenceEventTask implements CTGeofenceTask {
     }
 
     @Override
-    public void setOnCompleteListener(OnCompleteListener onCompleteListener) {
+    public void setOnCompleteListener(@NonNull OnCompleteListener onCompleteListener) {
         this.onCompleteListener = onCompleteListener;
     }
 }
