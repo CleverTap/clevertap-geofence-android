@@ -50,6 +50,8 @@ public class BackgroundLocationWork extends ListenableWorker {
                         }
 
                         try {
+                            Utils.notifyLocationUpdates(getApplicationContext(),location);
+
                             if (future != null) {
                                 future.get();
                             }

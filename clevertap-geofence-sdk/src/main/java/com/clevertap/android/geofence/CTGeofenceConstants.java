@@ -16,6 +16,9 @@ public class CTGeofenceConstants {
     static final String KEY_LAST_BG_LOCATION_UPDATES = "last_bg_location_updates";
     static final String KEY_LAST_LOG_LEVEL = "last_log_level";
     static final String KEY_LAST_GEO_COUNT = "last_geo_count";
+    static final String KEY_LAST_INTERVAL = "last_interval";
+    static final String KEY_LAST_FASTEST_INTERVAL = "last_fastest_interval";
+    static final String KEY_LAST_DISPLACEMENT = "last_displacement";
 
     static final String TAG_WORK_LOCATION_UPDATES = "com.clevertap.android.geofence.work.location";
 

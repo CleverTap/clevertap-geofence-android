@@ -128,7 +128,7 @@ class PushGeofenceEventTask implements CTGeofenceTask {
                     boolean isTriggeredGeofenceFound = false;
 
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject geofence = jsonArray.getJSONObject(i);
+                        final JSONObject geofence = jsonArray.getJSONObject(i);
                         if (String.valueOf(geofence.getInt(CTGeofenceConstants.KEY_ID))
                                 .equals(triggeredGeofence.getRequestId())) {
                             // triggered geofence found in file
@@ -152,18 +152,33 @@ class PushGeofenceEventTask implements CTGeofenceTask {
                                 return;
                             }
 
-                            CTGeofenceEventsListener ctGeofenceEventsListener = CTGeofenceAPI
+                            final CTGeofenceEventsListener ctGeofenceEventsListener = CTGeofenceAPI
                                     .getInstance(context).getCtGeofenceEventsListener();
 
                             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+
                                 future = cleverTapApi.pushGeofenceEnteredEvent(geofence);
+
                                 if (ctGeofenceEventsListener != null) {
-                                    ctGeofenceEventsListener.onGeofenceEnteredEvent(geofence);
+                                    com.clevertap.android.sdk.Utils.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ctGeofenceEventsListener.onGeofenceEnteredEvent(geofence);
+                                        }
+                                    });
                                 }
+
                             } else {
+
                                 future = cleverTapApi.pushGeoFenceExitedEvent(geofence);
+
                                 if (ctGeofenceEventsListener != null) {
-                                    ctGeofenceEventsListener.onGeofenceExitedEvent(geofence);
+                                    com.clevertap.android.sdk.Utils.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ctGeofenceEventsListener.onGeofenceExitedEvent(geofence);
+                                        }
+                                    });
                                 }
                             }
 

@@ -14,9 +14,9 @@ import com.clevertap.android.geofence.interfaces.CTGeofenceEventsListener;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
+import com.clevertap.android.geofence.interfaces.CTLocationUpdatesListener;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.clevertap.android.sdk.GeofenceCallback;
-import com.orhanobut.logger.DiskLogAdapter;
 
 import org.json.JSONObject;
 
@@ -38,13 +38,16 @@ public class CTGeofenceAPI implements GeofenceCallback {
     @Nullable
     private CleverTapAPI cleverTapAPI;
     private boolean isActivated;
-    @Nullable private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
-    @Nullable private CTGeofenceEventsListener ctGeofenceEventsListener;
+    @Nullable
+    private OnGeofenceApiInitializedListener onGeofenceApiInitializedListener;
+    @Nullable
+    private CTGeofenceEventsListener ctGeofenceEventsListener;
+    @Nullable
+    private CTLocationUpdatesListener ctLocationUpdatesListener;
     private String accountId;
 
     private CTGeofenceAPI(Context context) {
         this.context = context.getApplicationContext();
-        com.orhanobut.logger.Logger.addLogAdapter(new DiskLogAdapter(this.context));
 
         try {
             ctLocationAdapter = CTLocationFactory.createLocationAdapter(this.context);
@@ -196,7 +199,12 @@ public class CTGeofenceAPI implements GeofenceCallback {
             public void onComplete() {
 
                 if (onGeofenceApiInitializedListener != null) {
-                    onGeofenceApiInitializedListener.OnGeofenceApiInitialized();
+                    com.clevertap.android.sdk.Utils.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            onGeofenceApiInitializedListener.OnGeofenceApiInitialized();
+                        }
+                    });
                 }
             }
         });
@@ -265,21 +273,6 @@ public class CTGeofenceAPI implements GeofenceCallback {
             return;
         }
 
-/*        JSONObject jsonObject=new JSONObject();
-        try {
-            jsonObject.put(CTGeofenceConstants.KEY_ID,"8001");
-            jsonObject.put("lat","20.061722727398493");
-            jsonObject.put("lng","21.061722727398493");
-            jsonObject.put("r","200");
-            jsonObject.put("gcId","1");
-            jsonObject.put("gcName","Test1");
-
-            fenceList.getJSONArray("geofences").put(jsonObject);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
-
         GeofenceUpdateTask geofenceUpdateTask = new GeofenceUpdateTask(context, fenceList);
 
         CTGeofenceTaskManager.getInstance().postAsyncSafely("ProcessGeofenceUpdates",
@@ -320,6 +313,8 @@ public class CTGeofenceAPI implements GeofenceCallback {
                             public void onLocationComplete(Location location) {
                                 //get's called on bg thread
                                 cleverTapAPI.setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
+
+                                Utils.notifyLocationUpdates(context,location);
                             }
                         });
                     }
@@ -340,6 +335,15 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
     public void setCtGeofenceEventsListener(@NonNull CTGeofenceEventsListener ctGeofenceEventsListener) {
         this.ctGeofenceEventsListener = ctGeofenceEventsListener;
+    }
+
+    public void setCtLocationUpdatesListener(@NonNull CTLocationUpdatesListener ctLocationUpdatesListener) {
+        this.ctLocationUpdatesListener = ctLocationUpdatesListener;
+    }
+
+    @Nullable
+    public CTLocationUpdatesListener getCtLocationUpdatesListener() {
+        return ctLocationUpdatesListener;
     }
 
     @Nullable

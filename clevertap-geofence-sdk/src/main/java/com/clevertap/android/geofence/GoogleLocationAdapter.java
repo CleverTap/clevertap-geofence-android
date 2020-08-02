@@ -27,15 +27,18 @@ import static com.clevertap.android.geofence.CTGeofenceConstants.TAG_WORK_LOCATI
 
 class GoogleLocationAdapter implements CTLocationAdapter {
 
-    private static final long INTERVAL_IN_MILLIS = /*90 **/ 15 * 60 * 1000; // TODO: Exact values
-    private static final long INTERVAL_FASTEST_IN_MILLIS = /*90 **/ 15 * 60 * 1000;
-    private static final float SMALLEST_DISPLACEMENT_IN_METERS = 0;
-    private static final long FLEX_INTERVAL_IN_MILLIS = 5 * 60 * 1000;
+    static final long INTERVAL_IN_MILLIS = 60 * 60 * 1000; // TODO: Exact values
+    static final long INTERVAL_FASTEST_IN_MILLIS = 30 * 60 * 1000;
+    static final float SMALLEST_DISPLACEMENT_IN_METERS = 500;
+    private static final long FLEX_INTERVAL_IN_MILLIS = 10 * 60 * 1000;
     private final Context context;
     private final FusedLocationProviderClient fusedProviderClient;
     private boolean backgroundLocationUpdatesEnabled;
     private int locationFetchMode;
     private int locationAccuracy = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    private long interval;
+    private long fastestInterval;
+    private float smallestDisplacement;
 
     GoogleLocationAdapter(@NonNull Context context) {
         this.context = context.getApplicationContext();
@@ -107,7 +110,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
         try {
             PeriodicWorkRequest locationRequest = new PeriodicWorkRequest.Builder(BackgroundLocationWork.class,
-                    INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS,
+                    interval, TimeUnit.MILLISECONDS,
                     FLEX_INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS)
                     .build();
 
@@ -149,9 +152,9 @@ class GoogleLocationAdapter implements CTLocationAdapter {
             // blocking task
             location = Tasks.await(lastLocation);
 
-            if (location!=null) {
+            if (location != null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                        "New Location = "+location.getLatitude()+","+
+                        "New Location = " + location.getLatitude() + "," +
                                 location.getLongitude());
             }
 
@@ -169,10 +172,10 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
     private LocationRequest getLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(INTERVAL_IN_MILLIS);
-        locationRequest.setFastestInterval(INTERVAL_FASTEST_IN_MILLIS);
+        locationRequest.setInterval(interval);
+        locationRequest.setFastestInterval(fastestInterval);
         locationRequest.setPriority(locationAccuracy);
-        locationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT_IN_METERS);
+        locationRequest.setSmallestDisplacement(smallestDisplacement);
 
         return locationRequest;
     }
@@ -180,13 +183,15 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     private void applySettings(Context context) {
         CTGeofenceSettings geofenceSettings = CTGeofenceAPI.getInstance(context).getGeofenceSettings();
 
-        if (geofenceSettings == null)
-        {
-            geofenceSettings =  CTGeofenceAPI.getInstance(context).initDefaultConfig();
+        if (geofenceSettings == null) {
+            geofenceSettings = CTGeofenceAPI.getInstance(context).initDefaultConfig();
         }
 
         locationFetchMode = geofenceSettings.getLocationFetchMode();
         backgroundLocationUpdatesEnabled = geofenceSettings.isBackgroundLocationUpdatesEnabled();
+        interval = geofenceSettings.getInterval();
+        fastestInterval = geofenceSettings.getFastestInterval();
+        smallestDisplacement = geofenceSettings.getSmallestDisplacement();
 
         int accuracy = geofenceSettings.getLocationAccuracy();
         switch (accuracy) {

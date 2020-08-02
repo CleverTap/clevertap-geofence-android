@@ -10,9 +10,13 @@ public class CTGeofenceSettings {
     private final boolean backgroundLocationUpdates;
     private final byte locationAccuracy;
     private final byte locationFetchMode; // WorkManager or BroadcastReceiver
-    private final @LogLevel int logLevel;
+    private final @LogLevel
+    int logLevel;
     private final int geofenceMonitoringCount;
     private final String id;
+    private final long interval;
+    private final long fastestInterval;
+    private final float smallestDisplacement;
 
     public static final byte ACCURACY_HIGH = 1;
     @SuppressWarnings("unused")
@@ -33,6 +37,9 @@ public class CTGeofenceSettings {
         logLevel = builder.logLevel;
         geofenceMonitoringCount = builder.geofenceMonitoringCount;
         id = builder.id;
+        interval = builder.interval;
+        fastestInterval = builder.fastestInterval;
+        smallestDisplacement = builder.smallestDisplacement;
     }
 
     //TODO add comments for each method
@@ -41,9 +48,13 @@ public class CTGeofenceSettings {
         private boolean backgroundLocationUpdates = true;
         private byte locationAccuracy = ACCURACY_HIGH;
         private byte locationFetchMode = FETCH_LAST_LOCATION_PERIODIC;
-        private @LogLevel int logLevel = DEBUG;
+        private @LogLevel
+        int logLevel = DEBUG;
         private int geofenceMonitoringCount = DEFAULT_GEO_MONITOR_COUNT;
         private String id;
+        private long interval = GoogleLocationAdapter.INTERVAL_IN_MILLIS;
+        private long fastestInterval = GoogleLocationAdapter.INTERVAL_FASTEST_IN_MILLIS;
+        private float smallestDisplacement = GoogleLocationAdapter.SMALLEST_DISPLACEMENT_IN_METERS;
 
         public Builder() {
 
@@ -79,7 +90,38 @@ public class CTGeofenceSettings {
             return this;
         }
 
+        public CTGeofenceSettings.Builder setInterval(long interval) {
+            this.interval = interval;
+            return this;
+        }
+
+        public CTGeofenceSettings.Builder setFastestInterval(long fastestInterval) {
+            this.fastestInterval = fastestInterval;
+            return this;
+        }
+
+        public CTGeofenceSettings.Builder setSmallestDisplacement(float smallestDisplacement) {
+            this.smallestDisplacement = smallestDisplacement;
+            return this;
+        }
+
         public CTGeofenceSettings build() {
+
+            // applying minimum interval restriction
+            if (interval < GoogleLocationAdapter.INTERVAL_IN_MILLIS) {
+                interval = GoogleLocationAdapter.INTERVAL_IN_MILLIS;
+            }
+
+            // applying minimum fastest interval restriction
+            if (fastestInterval < GoogleLocationAdapter.INTERVAL_FASTEST_IN_MILLIS) {
+                fastestInterval = GoogleLocationAdapter.INTERVAL_FASTEST_IN_MILLIS;
+            }
+
+            // applying minimum displacement restriction
+            if (smallestDisplacement < GoogleLocationAdapter.SMALLEST_DISPLACEMENT_IN_METERS) {
+                smallestDisplacement = GoogleLocationAdapter.SMALLEST_DISPLACEMENT_IN_METERS;
+            }
+
             return new CTGeofenceSettings(this);
         }
     }
@@ -96,7 +138,8 @@ public class CTGeofenceSettings {
         return backgroundLocationUpdates;
     }
 
-    public @LogLevel int getLogLevel() {
+    public @LogLevel
+    int getLogLevel() {
         return logLevel;
     }
 
@@ -108,6 +151,18 @@ public class CTGeofenceSettings {
         return id;
     }
 
+    public long getInterval() {
+        return interval;
+    }
+
+    public long getFastestInterval() {
+        return fastestInterval;
+    }
+
+    public float getSmallestDisplacement() {
+        return smallestDisplacement;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,6 +172,7 @@ public class CTGeofenceSettings {
                 locationAccuracy == that.locationAccuracy &&
                 locationFetchMode == that.locationFetchMode &&
                 logLevel == that.logLevel && geofenceMonitoringCount == that.geofenceMonitoringCount
-                && id.equals(that.id);
+                && id.equals(that.id) && interval == that.interval && fastestInterval == that.fastestInterval
+                && smallestDisplacement == that.smallestDisplacement;
     }
 }

@@ -3,6 +3,7 @@ package com.clevertap.android.geofence;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.content.ContextCompat;
 
+import com.clevertap.android.geofence.interfaces.CTLocationUpdatesListener;
 import com.clevertap.android.sdk.CleverTapAPI;
 
 import org.json.JSONArray;
@@ -154,6 +156,9 @@ class Utils {
                         .setLogLevel(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_LOG_LEVEL))
                         .setGeofenceMonitoringCount(jsonObject.getInt(CTGeofenceConstants.KEY_LAST_GEO_COUNT))
                         .setId(jsonObject.getString(CTGeofenceConstants.KEY_ID))
+                        .setInterval(jsonObject.getLong(CTGeofenceConstants.KEY_LAST_INTERVAL))
+                        .setFastestInterval(jsonObject.getLong(CTGeofenceConstants.KEY_LAST_FASTEST_INTERVAL))
+                        .setSmallestDisplacement((float) jsonObject.getDouble(CTGeofenceConstants.KEY_LAST_DISPLACEMENT))
                         .build();
 
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -173,7 +178,7 @@ class Utils {
     }
 
     @WorkerThread
-    static void writeSettingsToFile(Context context,@NonNull CTGeofenceSettings ctGeofenceSettings) {
+    static void writeSettingsToFile(Context context, @NonNull CTGeofenceSettings ctGeofenceSettings) {
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Writing new settings to file...");
@@ -186,6 +191,9 @@ class Utils {
                     ctGeofenceSettings.isBackgroundLocationUpdatesEnabled());
             settings.put(CTGeofenceConstants.KEY_LAST_LOG_LEVEL, ctGeofenceSettings.getLogLevel());
             settings.put(CTGeofenceConstants.KEY_LAST_GEO_COUNT, ctGeofenceSettings.getGeofenceMonitoringCount());
+            settings.put(CTGeofenceConstants.KEY_LAST_INTERVAL, ctGeofenceSettings.getInterval());
+            settings.put(CTGeofenceConstants.KEY_LAST_FASTEST_INTERVAL, ctGeofenceSettings.getFastestInterval());
+            settings.put(CTGeofenceConstants.KEY_LAST_DISPLACEMENT, ctGeofenceSettings.getSmallestDisplacement());
             settings.put(CTGeofenceConstants.KEY_ID, CTGeofenceAPI.getInstance(context).getAccountId());
 
             boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
@@ -228,13 +236,14 @@ class Utils {
                 return false;
             }
 
-            ctGeofenceAPI.init(ctGeofenceSettings,cleverTapAPI);
+            ctGeofenceAPI.init(ctGeofenceSettings, cleverTapAPI);
         }
 
         return true;
     }
 
-    @NonNull static JSONArray subArray(@NonNull JSONArray arr, int fromIndex, int toIndex) {
+    @NonNull
+    static JSONArray subArray(@NonNull JSONArray arr, int fromIndex, int toIndex) {
 
         if (fromIndex > toIndex)
             throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
@@ -253,7 +262,21 @@ class Utils {
 
     }
 
-    static int getGeofenceSDKVersion(){
+    static int getGeofenceSDKVersion() {
         return BuildConfig.VERSION_CODE;
+    }
+
+    static void notifyLocationUpdates(@NonNull Context context, @NonNull final Location location) {
+        final CTLocationUpdatesListener ctLocationUpdatesListener = CTGeofenceAPI.getInstance(context)
+                .getCtLocationUpdatesListener();
+
+        if (ctLocationUpdatesListener != null) {
+            com.clevertap.android.sdk.Utils.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ctLocationUpdatesListener.onLocationUpdates(location);
+                }
+            });
+        }
     }
 }
