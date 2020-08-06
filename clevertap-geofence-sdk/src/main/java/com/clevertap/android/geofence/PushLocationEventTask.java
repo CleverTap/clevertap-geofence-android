@@ -48,6 +48,12 @@ class PushLocationEventTask implements CTGeofenceTask {
             if (future == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Dropping location ping event to CT server");
+                if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                    CTGeofenceAPI.getInstance(context)
+                            .getCleverTapApi()
+                            .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                    "Dropping location ping event to CT server");
+                }
                 return;
             }
 

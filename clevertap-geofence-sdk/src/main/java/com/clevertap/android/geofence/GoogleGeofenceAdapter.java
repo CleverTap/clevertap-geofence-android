@@ -98,6 +98,12 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         if (pendingIntent == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Can't stop geofence monitoring since provided pendingIntent is null");
+            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                CTGeofenceAPI.getInstance(context)
+                        .getCleverTapApi()
+                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                "Can't stop geofence monitoring since provided pendingIntent is null");
+            }
             return;
         }
 

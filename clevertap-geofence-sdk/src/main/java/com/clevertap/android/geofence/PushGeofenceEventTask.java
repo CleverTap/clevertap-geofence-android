@@ -53,6 +53,11 @@ class PushGeofenceEventTask implements CTGeofenceTask {
             String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "error while processing geofence event: " + errorMessage);
+            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                CTGeofenceAPI.getInstance(context)
+                        .getCleverTapApi()
+                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE, "error while processing geofence event: " + errorMessage);
+            }
             sendOnCompleteEvent();
             return;
         }
@@ -79,6 +84,12 @@ class PushGeofenceEventTask implements CTGeofenceTask {
             // Log the error.
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "invalid geofence transition type: " + geofenceTransition);
+            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                CTGeofenceAPI.getInstance(context)
+                        .getCleverTapApi()
+                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                "invalid geofence transition type: " + geofenceTransition);
+            }
         }
 
         sendOnCompleteEvent();
@@ -105,6 +116,12 @@ class PushGeofenceEventTask implements CTGeofenceTask {
         if (triggeringGeofences == null) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "fetched triggered geofence list is null");
+            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                CTGeofenceAPI.getInstance(context)
+                        .getCleverTapApi()
+                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                "fetched triggered geofence list is null");
+            }
             return;
 
         }
@@ -206,6 +223,14 @@ class PushGeofenceEventTask implements CTGeofenceTask {
                         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                 "Triggered geofence with id = " + triggeredGeofence.getRequestId()
                                         + " is not found in file! Dropping this event");
+                        if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                            CTGeofenceAPI.getInstance(context)
+                                    .getCleverTapApi()
+                                    .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                            "Triggered geofence with id = " +
+                                                    triggeredGeofence.getRequestId()
+                                                    + " is not found in file! Dropping this event");
+                        }
                     }
 
                 }

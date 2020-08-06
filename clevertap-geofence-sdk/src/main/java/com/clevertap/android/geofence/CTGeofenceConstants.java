@@ -21,5 +21,6 @@ public class CTGeofenceConstants {
     static final String KEY_LAST_DISPLACEMENT = "last_displacement";
 
     static final String TAG_WORK_LOCATION_UPDATES = "com.clevertap.android.geofence.work.location";
+    static final int ERROR_CODE = 999; //TODO finalise before release
 
 }

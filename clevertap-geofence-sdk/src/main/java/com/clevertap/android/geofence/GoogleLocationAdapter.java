@@ -56,6 +56,12 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         if (!backgroundLocationUpdatesEnabled) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "not requesting location updates since background location updates is not enabled");
+            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                CTGeofenceAPI.getInstance(context)
+                        .getCleverTapApi()
+                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                "not requesting location updates since background location updates is not enabled");
+            }
             return;
         }
 
@@ -102,6 +108,12 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         if (!Utils.isConcurrentFuturesDependencyAvailable()) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "concurrent-futures dependency is missing");
+            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                CTGeofenceAPI.getInstance(context)
+                        .getCleverTapApi()
+                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                "concurrent-futures dependency is missing");
+            }
             return;
         }
 

@@ -135,6 +135,9 @@ public class CTGeofenceAPI implements GeofenceCallback {
         if (accountId == null || accountId.isEmpty()) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Account Id is null or empty");
+            if (this.cleverTapAPI != null) {
+                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,"Account Id is null or empty");
+            }
             return;
         }
 
@@ -183,6 +186,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_FINE_LOCATION permission! Dropping initBackgroundLocationUpdates() call");
+            if (this.cleverTapAPI != null) {
+                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                        "We don't have ACCESS_FINE_LOCATION permission! Dropping initBackgroundLocationUpdates() call");
+            }
             return;
         }
 
@@ -258,12 +265,20 @@ public class CTGeofenceAPI implements GeofenceCallback {
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_FINE_LOCATION permission! dropping geofence update call");
+            if (this.cleverTapAPI != null) {
+                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                        "We don't have ACCESS_FINE_LOCATION permission! Dropping initBackgroundLocationUpdates() call");
+            }
             return;
         }
 
         if (!Utils.hasBackgroundLocationPermission(context)) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_BACKGROUND_LOCATION permission! dropping geofence update call");
+            if (this.cleverTapAPI != null) {
+                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                        "We don't have ACCESS_BACKGROUND_LOCATION permission! dropping geofence update call");
+            }
             return;
         }
 
@@ -296,6 +311,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
         if (!Utils.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "We don't have ACCESS_FINE_LOCATION permission! Dropping triggerLocation() call");
+            if (this.cleverTapAPI != null) {
+                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                        "We don't have ACCESS_FINE_LOCATION permission! Dropping triggerLocation() call");
+            }
             return;
         }
 

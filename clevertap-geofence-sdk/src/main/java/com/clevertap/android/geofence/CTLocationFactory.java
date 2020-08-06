@@ -23,8 +23,12 @@ class CTLocationFactory {
                         "Play service APK is available");
                 return new GoogleLocationAdapter(context.getApplicationContext());
             } else {
-
                 String errorString = GoogleApiAvailability.getInstance().getErrorString(googlePlayServicesAvailable);
+                if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
+                    CTGeofenceAPI.getInstance(context)
+                            .getCleverTapApi()
+                            .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,errorString);
+                }
                 throw new IllegalStateException("Play service APK error :: " + errorString);
             }
 
