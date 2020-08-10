@@ -62,12 +62,6 @@ class LocationUpdateTask implements CTGeofenceTask {
         } else {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Dropping duplicate location update request");
-            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
-                CTGeofenceAPI.getInstance(context)
-                        .getCleverTapApi()
-                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
-                                "Dropping duplicate location update request");
-            }
         }
 
         // write new settings to file

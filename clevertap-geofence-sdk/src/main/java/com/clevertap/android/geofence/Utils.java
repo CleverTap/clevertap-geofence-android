@@ -126,7 +126,7 @@ class Utils {
                 JSONObject object = array.getJSONObject(i);
                 geofenceIdList.add(object.getString(CTGeofenceConstants.KEY_ID));
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Could not convert JSON to GeofenceIdList - " + e.getMessage());
             e.printStackTrace();
@@ -210,6 +210,9 @@ class Utils {
         } catch (JSONException e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Failed to write new settings to file while parsing json");
+        } catch (Exception e) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Failed to write new settings to file");
         }
 
     }
