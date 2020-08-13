@@ -24,11 +24,11 @@ import java.util.concurrent.Future;
 class PushGeofenceEventTask implements CTGeofenceTask {
 
     private final Context context;
-    private final Intent intent;
+    @NonNull private final Intent intent;
     @Nullable
     private OnCompleteListener onCompleteListener;
 
-    PushGeofenceEventTask(Context context, Intent intent) {
+    PushGeofenceEventTask(Context context, @NonNull Intent intent) {
         this.context = context.getApplicationContext();
         this.intent = intent;
     }
@@ -49,14 +49,15 @@ class PushGeofenceEventTask implements CTGeofenceTask {
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 
-        if (geofencingEvent == null || geofencingEvent.hasError()) {
+        CleverTapAPI cleverTapApi = CTGeofenceAPI.getInstance(context).getCleverTapApi();
+
+        if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "error while processing geofence event: " + errorMessage);
-            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
-                CTGeofenceAPI.getInstance(context)
-                        .getCleverTapApi()
-                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE, "error while processing geofence event: " + errorMessage);
+            if(cleverTapApi != null){
+                cleverTapApi.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+                                "error while processing geofence event: " + errorMessage);
             }
             sendOnCompleteEvent();
             return;
@@ -84,10 +85,8 @@ class PushGeofenceEventTask implements CTGeofenceTask {
             // Log the error.
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "invalid geofence transition type: " + geofenceTransition);
-            if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
-                CTGeofenceAPI.getInstance(context)
-                        .getCleverTapApi()
-                        .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
+            if(cleverTapApi != null){
+                cleverTapApi.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
                                 "invalid geofence transition type: " + geofenceTransition);
             }
         }
