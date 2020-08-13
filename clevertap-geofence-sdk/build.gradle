@@ -40,6 +40,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
 }
 
 dependencies {
@@ -49,7 +55,60 @@ dependencies {
     compileOnly 'androidx.work:work-runtime:2.3.4'
     compileOnly 'androidx.concurrent:concurrent-futures:1.0.0'
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    /*testImplementation 'org.assertj:assertj-core:2.6.0'
+
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.mockito:mockito-core:2.25.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
+
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation "androidx.test.ext:junit:1.1.1"
+    testImplementation 'androidx.core:core:1.0.1'
+
+    testImplementation 'org.powermock:powermock:1.6.6'
+    testImplementation 'org.powermock:powermock-classloading-xstream:1.6.6'
+    testImplementation 'org.powermock:powermock-module-junit4-rule:1.6.6'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.7'
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
+    testImplementation 'org.json:json:20180813'
+    testImplementation fileTree(dir: 'libs', include: ['*.aar'])
+
+    androidTestImplementation 'com.android.support:support-annotations:28.0.0'
+
+    androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'*/
+
+    // Unit testing dependencies
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.mockito:mockito-core:2.25.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
+
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation "androidx.test.ext:junit:1.1.1"
+    testImplementation "androidx.appcompat:appcompat:1.1.0"
+
+    testImplementation 'org.powermock:powermock-core:2.0.7'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.7'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    testImplementation 'org.powermock:powermock-core:2.0.7'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
+    testImplementation 'org.powermock:powermock-module-junit4-rule:1.6.6'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.7'
+    testImplementation 'org.powermock:powermock-classloading-xstream:1.6.6'
+    testImplementation 'eu.codearte.catch-exception:catch-exception:2.0'
+    testImplementation fileTree(dir: 'libs', include: ['*.aar'])
+
+    testImplementation 'com.android.installreferrer:installreferrer:1.0'
+    testImplementation 'com.google.android.gms:play-services-location:17.0.0'
+    testImplementation 'org.skyscreamer:jsonassert:1.5.0'
 }
