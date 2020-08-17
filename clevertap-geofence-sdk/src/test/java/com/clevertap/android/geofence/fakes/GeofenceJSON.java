@@ -41,7 +41,7 @@ public class GeofenceJSON {
     public static JSONArray getGeofenceArray() {
         JSONArray jsonArray = null;
         try {
-            jsonArray=getGeofence().getJSONArray("geofences");
+            jsonArray = getGeofence().getJSONArray("geofences");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -52,7 +52,7 @@ public class GeofenceJSON {
     public static JSONArray getFirstFromGeofenceArray() {
         JSONArray jsonArray = null;
         try {
-            jsonArray=new JSONArray();
+            jsonArray = new JSONArray();
             jsonArray.put(getGeofence().getJSONArray("geofences").getJSONObject(0));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -61,10 +61,26 @@ public class GeofenceJSON {
         return jsonArray;
     }
 
+    public static JSONObject getFirst() {
+        JSONArray jsonArray = null;
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject();
+            jsonArray = new JSONArray();
+            jsonArray.put(getGeofence().getJSONArray("geofences").getJSONObject(0));
+
+            jsonObject.put("geofences", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonObject;
+    }
+
     public static JSONArray getLastFromGeofenceArray() {
         JSONArray jsonArray = null;
         try {
-            jsonArray=new JSONArray();
+            jsonArray = new JSONArray();
             jsonArray.put(getGeofence().getJSONArray("geofences").getJSONObject(1));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -95,7 +111,7 @@ public class GeofenceJSON {
         return jsonObject;
     }
 
-    public static String getGeofenceString(){
+    public static String getGeofenceString() {
         return GEOFENCE_JSON_STRING;
     }
 
