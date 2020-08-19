@@ -42,18 +42,17 @@ class PushLocationEventTask implements CTGeofenceTask {
             Utils.notifyLocationUpdates(context,locationResult.getLastLocation());
 
             @SuppressWarnings("ConstantConditions") //getCleverTapApi() won't be null here
-                    Future<?> future = CTGeofenceAPI.getInstance(context).getCleverTapApi()
-                    .setLocationForGeofences(locationResult.getLastLocation(), Utils.getGeofenceSDKVersion());
+                    Future<?> future = null;
+
+            if (locationResult.getLastLocation()!=null)
+            {
+                future = CTGeofenceAPI.getInstance(context)
+                        .processTriggeredLocation(locationResult.getLastLocation());
+            }
 
             if (future == null) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Dropping location ping event to CT server");
-                if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
-                    CTGeofenceAPI.getInstance(context)
-                            .getCleverTapApi()
-                            .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,
-                                    "Dropping location ping event to CT server");
-                }
                 return;
             }
 

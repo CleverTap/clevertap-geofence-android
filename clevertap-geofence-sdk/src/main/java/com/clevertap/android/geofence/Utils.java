@@ -269,7 +269,7 @@ class Utils {
         return BuildConfig.VERSION_CODE;
     }
 
-    static void notifyLocationUpdates(@NonNull Context context, @NonNull final Location location) {
+    static void notifyLocationUpdates(@NonNull Context context, @Nullable final Location location) {
         final CTLocationUpdatesListener ctLocationUpdatesListener = CTGeofenceAPI.getInstance(context)
                 .getCtLocationUpdatesListener();
 

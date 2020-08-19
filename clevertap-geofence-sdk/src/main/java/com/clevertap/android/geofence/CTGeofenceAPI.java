@@ -12,15 +12,21 @@ import androidx.annotation.RestrictTo;
 import com.clevertap.android.geofence.interfaces.CTGeofenceAdapter;
 import com.clevertap.android.geofence.interfaces.CTGeofenceEventsListener;
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
-import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
+import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationUpdatesListener;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.clevertap.android.sdk.GeofenceCallback;
 
 import org.json.JSONObject;
 
+import java.util.concurrent.Future;
+
 import static android.app.PendingIntent.FLAG_NO_CREATE;
+import static com.clevertap.android.geofence.CTGeofenceConstants.DEFAULT_LATITUDE;
+import static com.clevertap.android.geofence.CTGeofenceConstants.DEFAULT_LONGITUDE;
+import static com.clevertap.android.geofence.GoogleLocationAdapter.INTERVAL_IN_MILLIS;
+import static com.clevertap.android.geofence.GoogleLocationAdapter.SMALLEST_DISPLACEMENT_IN_METERS;
 
 public class CTGeofenceAPI implements GeofenceCallback {
 
@@ -136,7 +142,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Account Id is null or empty");
             if (this.cleverTapAPI != null) {
-                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,"Account Id is null or empty");
+                this.cleverTapAPI.pushGeoFenceError(CTGeofenceConstants.ERROR_CODE, "Account Id is null or empty");
             }
             return;
         }
@@ -331,15 +337,70 @@ public class CTGeofenceAPI implements GeofenceCallback {
                             @Override
                             public void onLocationComplete(Location location) {
                                 //get's called on bg thread
-                                cleverTapAPI.setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
 
-                                Utils.notifyLocationUpdates(context,location);
+                                if (location != null) {
+                                    processTriggeredLocation(location);
+                                }
+
+                                Utils.notifyLocationUpdates(context, location);
                             }
                         });
                     }
                 });
 
 
+    }
+
+    Future<?> processTriggeredLocation(@NonNull Location location) {
+        Future<?> future = null;
+
+        try {
+            if (cleverTapAPI == null)
+                return null;
+
+            Location lastStoredLocation = new Location("");
+
+            lastStoredLocation.setLatitude(GeofenceStorageHelper
+                    .getDouble(context, CTGeofenceConstants.KEY_LATITUDE, DEFAULT_LATITUDE));
+            lastStoredLocation.setLongitude(GeofenceStorageHelper
+                    .getDouble(context, CTGeofenceConstants.KEY_LONGITUDE, DEFAULT_LONGITUDE));
+
+            long lastStoredLocationEP = GeofenceStorageHelper.getLong(context
+                    , CTGeofenceConstants.KEY_LAST_LOCATION_EP, 0);
+            long now = System.currentTimeMillis() / 1000;
+
+            long deltaT = now - lastStoredLocationEP;
+            float deltaD = location.distanceTo(lastStoredLocation);
+
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Delta T for last two locations = " + deltaT);
+            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Delta D for last two locations = " + deltaD);
+
+            if (deltaT > INTERVAL_IN_MILLIS && deltaD > SMALLEST_DISPLACEMENT_IN_METERS) {
+
+                logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Sending last location to CleverTap..");
+
+                future = cleverTapAPI.setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
+
+                GeofenceStorageHelper.putDouble(context
+                        , CTGeofenceConstants.KEY_LATITUDE, location.getLatitude());
+                GeofenceStorageHelper.putDouble(context
+                        , CTGeofenceConstants.KEY_LONGITUDE, location.getLongitude());
+                GeofenceStorageHelper.putLong(context
+                        , CTGeofenceConstants.KEY_LAST_LOCATION_EP, System.currentTimeMillis() / 1000);
+
+            } else {
+                logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                        "Not sending last location to CleverTap");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return future;
     }
 
     @NonNull

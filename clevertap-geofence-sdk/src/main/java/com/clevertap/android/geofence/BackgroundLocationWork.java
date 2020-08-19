@@ -44,9 +44,9 @@ public class BackgroundLocationWork extends ListenableWorker {
                                 .getCleverTapApi();
                         Future<?> future = null;
 
-                        if (cleverTapApi != null) {
-                            future = cleverTapApi
-                                    .setLocationForGeofences(location, Utils.getGeofenceSDKVersion());
+                        if (cleverTapApi != null && location != null) {
+                            future = CTGeofenceAPI.getInstance(getApplicationContext())
+                                    .processTriggeredLocation(location);
                         }
 
                         try {
