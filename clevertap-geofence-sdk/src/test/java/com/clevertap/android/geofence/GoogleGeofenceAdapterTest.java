@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.Tasks;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -116,11 +117,12 @@ public class GoogleGeofenceAdapterTest extends BaseTestCase {
     }
 
     @Test
-    public void testAddAllGeofenceTC3() {
+    public void testAddAllGeofenceTC3() throws JSONException {
 
         // when fence list is not empty
 
-        List<CTGeofence> ctGeofences = CTGeofence.from(GeofenceJSON.getGeofence());
+        List<CTGeofence> ctGeofences = CTGeofence.from(GeofenceJSON.getGeofence()
+                .getJSONArray(CTGeofenceConstants.KEY_GEOFENCES));
         GoogleGeofenceAdapter geofenceAdapter = new GoogleGeofenceAdapter(application);
         when(geofencingClient.addGeofences(any(GeofencingRequest.class), any(PendingIntent.class)))
                 .thenReturn(task);
@@ -214,9 +216,10 @@ public class GoogleGeofenceAdapterTest extends BaseTestCase {
     }
 
     @Test
-    public void testGetGeofencingRequest() {
+    public void testGetGeofencingRequest() throws JSONException {
         GoogleGeofenceAdapter geofenceAdapter = new GoogleGeofenceAdapter(application);
-        List<CTGeofence> ctGeofences = CTGeofence.from(GeofenceJSON.getGeofence());
+        List<CTGeofence> ctGeofences = CTGeofence.from(GeofenceJSON.getGeofence()
+                .getJSONArray(CTGeofenceConstants.KEY_GEOFENCES));
 
         try {
             List<Geofence> googleGeofences = WhiteboxImpl.invokeMethod(geofenceAdapter,

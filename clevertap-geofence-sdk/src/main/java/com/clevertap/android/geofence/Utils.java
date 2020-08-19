@@ -12,14 +12,18 @@ import androidx.annotation.WorkerThread;
 import androidx.core.content.ContextCompat;
 
 import com.clevertap.android.geofence.interfaces.CTLocationUpdatesListener;
+import com.clevertap.android.geofence.model.CTGeofence;
 import com.clevertap.android.sdk.CleverTapAPI;
+import com.clevertap.android.sdk.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class Utils {
 
@@ -116,7 +120,7 @@ class Utils {
         return str == null ? "" : str;
     }
 
-    static List<String> jsonToGeoFenceList(@NonNull JSONObject jsonObject) {
+    @NonNull static List<String> jsonToGeoFenceList(@NonNull JSONObject jsonObject) {
         ArrayList<String> geofenceIdList = new ArrayList<>();
         try {
             JSONArray array = jsonObject.getJSONArray("geofences");
@@ -128,11 +132,38 @@ class Utils {
             }
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Could not convert JSON to GeofenceIdList - " + e.getMessage());
+                    "Could not convert JSON to GeofenceIdList");
             e.printStackTrace();
         }
         return geofenceIdList;
     }
+
+    @NonNull static Set<CTGeofence> jsonToGeoFenceSet(@Nullable JSONObject jsonObject) {
+        Set<CTGeofence> ctGeofenceSet = new HashSet<>();
+
+        if (jsonObject == null)
+            return ctGeofenceSet;
+
+        try {
+            JSONArray array = jsonObject.getJSONArray(CTGeofenceConstants.KEY_GEOFENCES);
+
+            for (int i = 0; i < array.length(); i++) {
+
+                JSONObject object = array.getJSONObject(i);
+                CTGeofence ctGeofence = CTGeofence.from(object);
+                if (ctGeofence!=null)
+                {
+                    ctGeofenceSet.add(ctGeofence);
+                }
+            }
+        } catch (Exception e) {
+            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                    "Could not convert JSON to GeofenceIdSet");
+            e.printStackTrace();
+        }
+        return ctGeofenceSet;
+    }
+
 
     @WorkerThread
     @Nullable

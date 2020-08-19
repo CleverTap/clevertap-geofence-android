@@ -44,13 +44,14 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
         ArrayList<Geofence> googleFenceList = getGoogleGeofences(fenceList);
         Void aVoid = null;
+        Task<Void> addGeofenceTask = null;
 
         try {
             // should get same pendingIntent on each app launch or else instance will leak
             PendingIntent geofencePendingIntent = PendingIntentFactory.getPendingIntent(context,
                     PendingIntentFactory.PENDING_INTENT_GEOFENCE, FLAG_UPDATE_CURRENT);
 
-            Task<Void> addGeofenceTask = geofencingClient.addGeofences(getGeofencingRequest(googleFenceList), geofencePendingIntent);
+            addGeofenceTask = geofencingClient.addGeofences(getGeofencingRequest(googleFenceList), geofencePendingIntent);
             // blocking task
             aVoid = Tasks.await(addGeofenceTask);
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence registered successfully");
@@ -60,7 +61,10 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
                     "Failed to add geofences for monitoring");
             e.printStackTrace();
         } finally {
-            onSuccessListener.onSuccess(aVoid);
+            if (addGeofenceTask!=null && addGeofenceTask.isSuccessful())
+            {
+                onSuccessListener.onSuccess(aVoid);
+            }
         }
 
     }
@@ -76,8 +80,9 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         }
 
         Void aVoid = null;
+        Task<Void> removeGeofenceTask = null;
         try {
-            Task<Void> removeGeofenceTask = geofencingClient.removeGeofences(fenceIdList);
+            removeGeofenceTask = geofencingClient.removeGeofences(fenceIdList);
             // blocking task
             aVoid = Tasks.await(removeGeofenceTask);
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "Geofence removed successfully");
@@ -87,7 +92,9 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
                     "Failed to remove registered geofences");
             e.printStackTrace();
         } finally {
-            onSuccessListener.onSuccess(aVoid);
+            if (removeGeofenceTask!=null && removeGeofenceTask.isSuccessful()) {
+                onSuccessListener.onSuccess(aVoid);
+            }
         }
     }
 

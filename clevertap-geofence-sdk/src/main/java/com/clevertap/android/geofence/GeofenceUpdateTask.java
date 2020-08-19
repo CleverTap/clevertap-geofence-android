@@ -12,9 +12,13 @@ import com.clevertap.android.geofence.model.CTGeofence;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Adds/Replaces(remove followed by add) Geofences into file and Geofence Client
@@ -24,7 +28,7 @@ class GeofenceUpdateTask implements CTGeofenceTask {
     private final Context context;
     @Nullable
     private final CTGeofenceAdapter ctGeofenceAdapter;
-    private final JSONObject fenceList;
+    @Nullable private final JSONObject fenceList;
     @Nullable
     private OnCompleteListener onCompleteListener;
 
@@ -47,16 +51,16 @@ class GeofenceUpdateTask implements CTGeofenceTask {
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                 "Reading previously registered geofences from file...");
 
+        final JSONObject fenceSubList = getTrimmedGeofence(fenceList);
+
         String oldFenceListString = FileUtils.readFromFile(context,
                 FileUtils.getCachedFullPath(context, CTGeofenceConstants.CACHED_FILE_NAME));
 
         if (!oldFenceListString.trim().equals("")) {
 
-            List<String> ctOldGeofenceIdList = null;
             JSONObject ctOldGeofenceObject = null;
             try {
                 ctOldGeofenceObject = new JSONObject(oldFenceListString);
-                ctOldGeofenceIdList = Utils.jsonToGeoFenceList(ctOldGeofenceObject);
             } catch (Exception e) {
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Failed to read previously registered geofences from file");
@@ -64,22 +68,48 @@ class GeofenceUpdateTask implements CTGeofenceTask {
             }
 
             if (fenceList != null) {
-                //remove previously added geofences
-                ctGeofenceAdapter.removeAllGeofence(ctOldGeofenceIdList, new OnSuccessListener() {
+
+                final Set<CTGeofence> newGeofenceSet = Utils.jsonToGeoFenceSet(fenceSubList); // A
+                Set<CTGeofence> oldGeofenceSet = Utils.jsonToGeoFenceSet(ctOldGeofenceObject); // B
+                final Set<CTGeofence> oldGeofenceSetCopy = Utils.jsonToGeoFenceSet(ctOldGeofenceObject); // B copy
+
+                oldGeofenceSet.removeAll(newGeofenceSet);// set operation B - A
+                newGeofenceSet.removeAll(oldGeofenceSetCopy); // set operation A - B
+
+                //remove invalid geofences
+                ctGeofenceAdapter.removeAllGeofence(CTGeofence.toIdList(oldGeofenceSet), new OnSuccessListener() {
                     @Override
                     public void onSuccess(Object o) {
                         // called on same calling thread
-                        addGeofences(fenceList);
+
+                        // add brand new geofences
+                        addGeofences(fenceSubList,new ArrayList<>(newGeofenceSet));
                     }
                 });
             } else {
                 // In case device reboot, boot receiver will pass null fenceList which simply means
                 // read old fences from file and add back to Geofence Client
-                addGeofences(ctOldGeofenceObject);
+                try {
+                    if (ctOldGeofenceObject!=null)
+                    {
+                        addGeofences(ctOldGeofenceObject,CTGeofence.from(ctOldGeofenceObject
+                                .getJSONArray(CTGeofenceConstants.KEY_GEOFENCES)));
+
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             // add new fences
-            addGeofences(fenceList);
+            try {
+                if (fenceSubList != null) {
+                    addGeofences(fenceSubList,CTGeofence.from(fenceSubList
+                            .getJSONArray(CTGeofenceConstants.KEY_GEOFENCES)));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -92,42 +122,62 @@ class GeofenceUpdateTask implements CTGeofenceTask {
      * and store it to file followed by registration through
      * {@link GoogleGeofenceAdapter#addAllGeofence(List, OnSuccessListener)}
      *
-     * @param geofenceObject json response containing list of geofences
+     * @param fenceSubList json response containing list of geofences
      */
     @WorkerThread
-    private void addGeofences(@Nullable JSONObject geofenceObject) {
+    private void addGeofences(@Nullable final JSONObject fenceSubList, final List<CTGeofence> ctGeofenceList) {
 
-        if (geofenceObject == null || ctGeofenceAdapter == null) {
+        if (fenceSubList == null || ctGeofenceAdapter == null) {
             return;
         }
 
-        int geofenceMoitoringCount = CTGeofenceSettings.DEFAULT_GEO_MONITOR_COUNT;
+
+        //final List<CTGeofence> ctGeofenceList = CTGeofence.from(fenceSubList);
+
+        ctGeofenceAdapter.addAllGeofence(ctGeofenceList, new OnSuccessListener() {
+            @Override
+            public void onSuccess(Object o) {
+                // if geofences gets added successfully to OS then only write to file
+                updateGeofencesToFile(ctGeofenceList.size(),fenceSubList);
+                if (onCompleteListener != null) {
+                    onCompleteListener.onComplete();
+                }
+            }
+        });
+    }
+
+    private JSONObject getTrimmedGeofence(@Nullable JSONObject geofenceObject) {
+
+        if (geofenceObject==null)
+            return null;
+
+        int geofenceMonitoringCount = CTGeofenceSettings.DEFAULT_GEO_MONITOR_COUNT;
         CTGeofenceSettings geofenceSettings = CTGeofenceAPI.getInstance(context).getGeofenceSettings();
 
         if (geofenceSettings != null) {
-            geofenceMoitoringCount = geofenceSettings.getGeofenceMonitoringCount();
+            geofenceMonitoringCount = geofenceSettings.getGeofenceMonitoringCount();
         }
 
-        JSONObject fenceSubList = new JSONObject();
+        final JSONObject fenceSubList = new JSONObject();
 
         try {
             JSONArray geofenceObjectJSONArray = geofenceObject.getJSONArray(CTGeofenceConstants.KEY_GEOFENCES);
 
-            if (geofenceMoitoringCount > geofenceObjectJSONArray.length()) {
+            if (geofenceMonitoringCount > geofenceObjectJSONArray.length()) {
 
                 CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Requested geofence monitoring count is greater than available count." +
                                 " Setting request count to " + geofenceObjectJSONArray.length());
 
-                geofenceMoitoringCount = geofenceObjectJSONArray.length();
+                geofenceMonitoringCount = geofenceObjectJSONArray.length();
             }
 
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                    "Extracting Top " + geofenceMoitoringCount + " new geofences out of " +
+                    "Extracting Top " + geofenceMonitoringCount + " new geofences out of " +
                             geofenceObjectJSONArray.length() + "...");
 
             JSONArray jsonSubArray = Utils.subArray(geofenceObjectJSONArray,
-                    0, geofenceMoitoringCount);
+                    0, geofenceMonitoringCount);
             fenceSubList.put(CTGeofenceConstants.KEY_GEOFENCES, jsonSubArray);
 
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -137,9 +187,18 @@ class GeofenceUpdateTask implements CTGeofenceTask {
                     "Failed to create geofence sublist");
             e.printStackTrace();
         }
+        return fenceSubList;
+    }
+
+    @Override
+    public void setOnCompleteListener(@NonNull OnCompleteListener onCompleteListener) {
+        this.onCompleteListener = onCompleteListener;
+    }
+
+    private void updateGeofencesToFile(int geofenceMonitoringCount,@NonNull JSONObject fenceSubList){
 
         CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
-                "Writing " + geofenceMoitoringCount + " new geofences to file...");
+                "Writing " + geofenceMonitoringCount + " new geofences to file...");
 
         //add new geofences, this will overwrite old ones
         boolean writeJsonToFile = FileUtils.writeJsonToFile(context, FileUtils.getCachedDirName(context),
@@ -157,21 +216,5 @@ class GeofenceUpdateTask implements CTGeofenceTask {
                         .pushGeoFenceError(CTGeofenceConstants.ERROR_CODE,"Failed to write new geofences to file");
             }
         }
-
-        List<CTGeofence> ctGeofenceList = CTGeofence.from(fenceSubList);
-
-        ctGeofenceAdapter.addAllGeofence(ctGeofenceList, new OnSuccessListener() {
-            @Override
-            public void onSuccess(Object o) {
-                if (onCompleteListener != null) {
-                    onCompleteListener.onComplete();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void setOnCompleteListener(@NonNull OnCompleteListener onCompleteListener) {
-        this.onCompleteListener = onCompleteListener;
     }
 }

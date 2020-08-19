@@ -77,6 +77,22 @@ public class GeofenceJSON {
         return jsonObject;
     }
 
+    public static JSONObject getLast() {
+        JSONArray jsonArray = null;
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject();
+            jsonArray = new JSONArray();
+            jsonArray.put(getGeofence().getJSONArray("geofences").getJSONObject(1));
+
+            jsonObject.put("geofences", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonObject;
+    }
+
     public static JSONArray getLastFromGeofenceArray() {
         JSONArray jsonArray = null;
         try {
