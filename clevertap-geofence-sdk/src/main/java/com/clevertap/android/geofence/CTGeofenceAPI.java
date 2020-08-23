@@ -326,7 +326,6 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
         if (!isActivated) {
             throw new IllegalStateException("Geofence SDK must be initialized before triggerLocation()");
-            //TODO: app is not calling activate() in any case, so this logging needs to change
         }
 
         CTGeofenceTaskManager.getInstance().postAsyncSafely("TriggerLocation",
@@ -365,11 +364,11 @@ public class CTGeofenceAPI implements GeofenceCallback {
             lastStoredLocation.setLongitude(GeofenceStorageHelper
                     .getDouble(context, CTGeofenceConstants.KEY_LONGITUDE, DEFAULT_LONGITUDE));
 
-            long lastStoredLocationEP = GeofenceStorageHelper.getLong(context
+            long lastStoredLocationEPMillis = GeofenceStorageHelper.getLong(context
                     , CTGeofenceConstants.KEY_LAST_LOCATION_EP, 0);
-            long now = System.currentTimeMillis() / 1000;
+            long nowMillis = System.currentTimeMillis();
 
-            long deltaT = now - lastStoredLocationEP;
+            long deltaT = nowMillis - lastStoredLocationEPMillis;
             float deltaD = location.distanceTo(lastStoredLocation);
 
             logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -389,7 +388,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
                 GeofenceStorageHelper.putDouble(context
                         , CTGeofenceConstants.KEY_LONGITUDE, location.getLongitude());
                 GeofenceStorageHelper.putLong(context
-                        , CTGeofenceConstants.KEY_LAST_LOCATION_EP, System.currentTimeMillis() / 1000);
+                        , CTGeofenceConstants.KEY_LAST_LOCATION_EP, System.currentTimeMillis());
 
             } else {
                 logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -458,5 +457,9 @@ public class CTGeofenceAPI implements GeofenceCallback {
     @NonNull
     String getAccountId() {
         return Utils.emptyIfNull(accountId);
+    }
+
+    boolean isActivated() {
+        return isActivated;
     }
 }

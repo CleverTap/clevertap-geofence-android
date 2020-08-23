@@ -1,6 +1,7 @@
 package com.clevertap.android.geofence;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 
@@ -17,7 +18,7 @@ import static com.clevertap.android.geofence.CTGeofenceAPI.GEOFENCE_LOG_TAG;
 class CTGeofenceTaskManager {
 
     private static CTGeofenceTaskManager taskManager;
-    private final ExecutorService es;
+    private ExecutorService es;
     private long EXECUTOR_THREAD_ID = 0;
 
     private CTGeofenceTaskManager() {
@@ -108,5 +109,9 @@ class CTGeofenceTaskManager {
         }
 
         return future;
+    }
+
+    void setExecutorService(ExecutorService es) {
+        this.es = es;
     }
 }
