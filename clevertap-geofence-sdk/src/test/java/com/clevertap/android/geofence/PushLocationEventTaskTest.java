@@ -30,6 +30,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -102,9 +103,10 @@ public class PushLocationEventTaskTest extends BaseTestCase {
         when(Utils.initCTGeofenceApiIfRequired(application)).thenReturn(true);
 
         WhiteboxImpl.setInternalState(ctGeofenceAPI, "cleverTapAPI", cleverTapAPI);
+        WhiteboxImpl.setInternalState(ctGeofenceAPI, "context", application);
+
         Mockito.when(cleverTapAPI.setLocationForGeofences(any(Location.class), anyInt())).
                 thenReturn(future);
-
         task.execute();
 
         verifyStatic(Utils.class);
@@ -132,14 +134,16 @@ public class PushLocationEventTaskTest extends BaseTestCase {
         when(Utils.initCTGeofenceApiIfRequired(application)).thenReturn(true);
 
         WhiteboxImpl.setInternalState(ctGeofenceAPI, "cleverTapAPI", cleverTapAPI);
+        WhiteboxImpl.setInternalState(ctGeofenceAPI, "context", application);
+
+        Mockito.when(cleverTapAPI.setLocationForGeofences(any(Location.class), anyInt())).
+                thenReturn(null);
 
         task.execute();
 
         verifyStatic(Utils.class);
         Utils.notifyLocationUpdates(any(Context.class), any(Location.class));
         Mockito.verify(cleverTapAPI).setLocationForGeofences(any(Location.class), anyInt());
-        Mockito.verify(cleverTapAPI).pushGeoFenceError(anyInt(), anyString());
-
         Mockito.verify(onCompleteListener).onComplete();
 
     }
