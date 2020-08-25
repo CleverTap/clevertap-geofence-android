@@ -4,11 +4,28 @@
 
 ## clevertap-geofence-android
 
+## Table of contents
+
+* [Introduction](#introduction)
+* [Installation](#installation)
+* [Manifest Permissions](#manifest-permissions)
+* [Runtime Location Permission](#runtime-location-permission)
+* [Initialization](#initialization)
+* [Settings parameters](#settings-parameters)
+* [Trigger Location](#trigger-location)
+* [Callbacks/Listeners](#callbackslisteners)
+* [Deactivation](#deactivation)
+* [Example Usage](#example-usage)
+* [FAQ](#faq)
+
 ## Introduction
+[(Back to top)](#table-of-contents)
 
 CleverTap Geofence SDK provides Geofencing capabilities to CleverTap Android SDK by using the Play Services Location library. If you haven't already configured your project for Play Services, follow the instructions [here](https://developers.google.com/android/guides/google-services-plugin).
 
 ## Installation
+[(Back to top)](#table-of-contents)
+
 Add the following dependencies to the ```build.gradle```
 
 ```
@@ -19,6 +36,8 @@ implementation 'androidx.work:work-runtime:2.3.4' // required for FETCH_LAST_LOC
 implementation 'androidx.concurrent:concurrent-futures:1.0.0' // required for FETCH_LAST_LOCATION_PERIODIC
 ```
 ## Manifest Permissions
+[(Back to top)](#table-of-contents)
+
 In order to start using geofence in your app, the app will need below permissions in `AndroidManifest.xml` which is already added by SDK so you don’t have to add anything in manifest.
 ```
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -28,6 +47,8 @@ In order to start using geofence in your app, the app will need below permission
 ```
 
 ## Runtime Location Permission
+[(Back to top)](#table-of-contents)
+
 ```
 android.permission.ACCESS_FINE_LOCATION
 android.permission.ACCESS_BACKGROUND_LOCATION (Required only when requesting background location access on Android 10 (API level 29))
@@ -37,6 +58,8 @@ Before SDK initialization App will need to prompt users to grant above permissio
 See [Permissions](https://developer.android.com/preview/features/runtime-permissions.html) and [Location Permissions](https://developer.android.com/training/location/permissions#request-location-access-runtime) for more details.
 
 ## Initialization
+[(Back to top)](#table-of-contents)
+
 `CTGeofenceAPI` needs an object of `CTGeofenceSettings` and the object of `CleverTapAPI` to be initialized in the following manner-
 
 ```CTGeofenceAPI.getInstance(getApplicationContext()).init(ctGeofenceSettings,cleverTapAPI);```
@@ -62,10 +85,12 @@ CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings.Builder()
 * CT Geofence SDK will raise the “Geofence Cluster Entered” and “Geofence Cluster Exited” events automatically. The app cannot raise these methods manually.
 
 ## Settings parameters
+[(Back to top)](#table-of-contents)
 
 Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/Geofence-Settings)
 
 ## Trigger Location
+[(Back to top)](#table-of-contents)
 
 This method fetches last known location from OS (can be null) and delivers it to APP through `CTLocationUpdatesListener`. 
 Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/Trigger-Location)
@@ -80,6 +105,7 @@ try {
 ```
 
 ## Callbacks/Listeners
+[(Back to top)](#table-of-contents)
 
 CleverTap Geofence SDK provides 3 callbacks or listeners on the main thread to the app for more control to the developers.
 
@@ -143,6 +169,7 @@ CTGeofenceAPI.getInstance(getApplicationContext())
  ```
 
 ## Deactivation
+[(Back to top)](#table-of-contents)
 
 If at any point you want to deactivate the CT Geofence SDK, you can do so in the following way-
 
@@ -151,9 +178,11 @@ If at any point you want to deactivate the CT Geofence SDK, you can do so in the
 **Note:** Deactivation will remove all callbacks/listeners as well. 
 
 ## Example Usage
+[(Back to top)](#table-of-contents)
 
 A [demo application](https://github.com/CleverTap/clevertap-geofence-android/tree/feature/geofence/SDK-264/app) showing geofence sdk integration.
 
 ## FAQ
+[(Back to top)](#table-of-contents)
 
 FAQ can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/3.-FAQ). If your question is not found in FAQ and you have other questions or concerns, you can reach out to the CleverTap support team at [support@clevertap.com](mailto:support@clevertap.com).
