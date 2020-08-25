@@ -236,7 +236,6 @@ public class CTGeofenceAPI implements GeofenceCallback {
             return;
         }
 
-        //  TODO: clean up resources
         CTGeofenceTaskManager.getInstance().postAsyncSafely("DeactivateApi", new Runnable() {
             @Override
             public void run() {
@@ -252,6 +251,14 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
                 // delete cached files
                 FileUtils.deleteDirectory(context, FileUtils.getCachedDirName(context));
+
+                // reset preference
+                GeofenceStorageHelper.putDouble(context
+                        , CTGeofenceConstants.KEY_LATITUDE, DEFAULT_LATITUDE);
+                GeofenceStorageHelper.putDouble(context
+                        , CTGeofenceConstants.KEY_LONGITUDE, DEFAULT_LONGITUDE);
+                GeofenceStorageHelper.putLong(context
+                        , CTGeofenceConstants.KEY_LAST_LOCATION_EP,0);
 
                 isActivated = false;
             }
