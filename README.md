@@ -6,7 +6,7 @@
 
 ## Introduction
 
-CleverTap Geofence SDK provides Geofencing capabilities to CleverTap Android SDK.
+CleverTap Geofence SDK provides Geofencing capabilities to CleverTap Android SDK by using the Play Services Location library. If you haven't already configured your project for Play Services, follow the instructions [here](https://developers.google.com/android/guides/google-services-plugin).
 
 ## Installation
 Add the following dependencies to the ```build.gradle```
