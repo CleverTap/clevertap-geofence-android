@@ -1,3 +1,5 @@
+## Trigger Location
+
 `triggerLocation()` - This method fetches last known location from OS (can be null) and delivers it to APP through CTLocationUpdatesListener. This also synchronises geofences based on location passed to CleverTap servers with throttling limit of minimum `30 minutes` and minimum displacement of `200 meters` between two syncs.
 
 **Note:** Geofence SDK must be initialised before this method call or else `IllegalStateException` will be thrown

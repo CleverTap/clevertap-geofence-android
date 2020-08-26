@@ -87,7 +87,7 @@ CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings.Builder()
 
 ## Settings parameters
 [(Back to top)](#table-of-contents)
-Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/Settings.md))
+Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/Settings.md)
 
 
 ## Trigger Location
