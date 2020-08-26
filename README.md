@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/CleverTap/clevertap-segment-ios/blob/master/clevertap-logo.png" width="230"/>
+  <img src="https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/static/clevertap-logo.png" width="230"/>
 </p>
 
 ## clevertap-geofence-android
@@ -17,6 +17,7 @@
 * [Deactivation](#deactivation)
 * [Example Usage](#example-usage)
 * [FAQ](#faq)
+* [Questions](#questions)
 
 ## Introduction
 [(Back to top)](#table-of-contents)
@@ -86,14 +87,14 @@ CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings.Builder()
 
 ## Settings parameters
 [(Back to top)](#table-of-contents)
+Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/Settings.md))
 
-Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/Geofence-Settings)
 
 ## Trigger Location
 [(Back to top)](#table-of-contents)
 
 This method fetches last known location from OS (can be null) and delivers it to APP through `CTLocationUpdatesListener`. 
-Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/Trigger-Location)
+Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/TriggerLocation.md)
 
 ```
 try {
@@ -185,4 +186,9 @@ A [demo application](https://github.com/CleverTap/clevertap-geofence-android/tre
 ## FAQ
 [(Back to top)](#table-of-contents)
 
-FAQ can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/FAQ). If your question is not found in FAQ and you have other questions or concerns, you can reach out to the CleverTap support team at [support@clevertap.com](mailto:support@clevertap.com).
+FAQ can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/FAQ.md). 
+
+## Questions
+[(Back to top)](#table-of-contents)
+
+If your question is not found in FAQ and you have other questions or concerns, you can reach out to the CleverTap support team by raising an issue from the CleverTap Dashboard.
