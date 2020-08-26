@@ -185,4 +185,4 @@ A [demo application](https://github.com/CleverTap/clevertap-geofence-android/tre
 ## FAQ
 [(Back to top)](#table-of-contents)
 
-FAQ can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/3.-FAQ). If your question is not found in FAQ and you have other questions or concerns, you can reach out to the CleverTap support team at [support@clevertap.com](mailto:support@clevertap.com).
+FAQ can be found [here](https://github.com/CleverTap/clevertap-geofence-android/wiki/FAQ). If your question is not found in FAQ and you have other questions or concerns, you can reach out to the CleverTap support team at [support@clevertap.com](mailto:support@clevertap.com).
