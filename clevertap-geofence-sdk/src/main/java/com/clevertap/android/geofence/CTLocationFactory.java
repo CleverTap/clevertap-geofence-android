@@ -8,8 +8,20 @@ import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+/**
+ * A Factory to create an instance of {@link CTLocationAdapter}
+ */
 class CTLocationFactory {
 
+    /**
+     * Creates an instance of {@link CTLocationAdapter}, if FusedLocationApi dependency and
+     * Play service APK in device is available
+     *
+     * @param context application {@link Context}
+     * @return an instance of {@link CTLocationAdapter}
+     * @throws IllegalStateException if play-services-location dependency is missing or Play service APK
+     * error is reported by GoogleApi.
+     */
     static CTLocationAdapter createLocationAdapter(@NonNull Context context) {
 
         int googlePlayServicesAvailable = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);

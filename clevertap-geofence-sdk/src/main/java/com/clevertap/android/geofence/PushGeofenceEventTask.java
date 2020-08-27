@@ -21,6 +21,10 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.concurrent.Future;
 
+/**
+ * A task of type {@link CTGeofenceTask} responsible for processing and sending {@code GeoCluster Entered}
+ * or {@code GeoCluster Exited} events to CleverTap SDK which will in turn send it to server.
+ */
 class PushGeofenceEventTask implements CTGeofenceTask {
 
     private final Context context;
@@ -33,6 +37,12 @@ class PushGeofenceEventTask implements CTGeofenceTask {
         this.intent = intent;
     }
 
+    /**
+     * Creates {@link com.clevertap.android.sdk.CleverTapAPI} instance if it's null, mostly in killed state.
+     * On Enter or Exit transition triggered {@link GeofencingEvent} will be sent to {@link #pushGeofenceEvents(List, Location, int)}
+     * for further processing, if it has no error in it.<br>
+     * Caller will be notified of completion of the task through {@link OnCompleteListener}
+     */
     @WorkerThread
     @Override
     public void execute() {
@@ -95,6 +105,9 @@ class PushGeofenceEventTask implements CTGeofenceTask {
 
     }
 
+    /**
+     * Notifies listeners when task execution completes
+     */
     private void sendOnCompleteEvent() {
         if (onCompleteListener != null) {
             onCompleteListener.onComplete();
@@ -102,11 +115,14 @@ class PushGeofenceEventTask implements CTGeofenceTask {
     }
 
     /**
-     * Push geofence event to CT SDK. If multiple geofences are triggered then send it sequentially
+     * Searches triggered geofences in file and sends them to CleverTap SDK to raise {@code GeoCluster Entered}
+     * or {@code GeoCluster Exited} events. Error will be sent to CleverTap in case triggered geofence
+     * not found in file.<br>
+     * Apps will be notified of events through {@link CTGeofenceEventsListener} on main thread
      *
-     * @param triggeringGeofences - List of {@link Geofence}
-     * @param triggeringLocation  - {@link Location} object
-     * @param geofenceTransition  - int value of geofence transition event
+     * @param triggeringGeofences List of triggered {@link Geofence}
+     * @param triggeringLocation {@link Location} object which triggered geofence event
+     * @param geofenceTransition int value of geofence transition event
      */
     @WorkerThread
     private void pushGeofenceEvents(@Nullable List<Geofence> triggeringGeofences, @Nullable Location triggeringLocation,
@@ -173,8 +189,10 @@ class PushGeofenceEventTask implements CTGeofenceTask {
 
                             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
 
+                                // send event to CleverTap SDK
                                 future = cleverTapApi.pushGeofenceEnteredEvent(geofence);
 
+                                // send event to Listener on main thread
                                 if (ctGeofenceEventsListener != null) {
                                     com.clevertap.android.sdk.Utils.runOnUiThread(new Runnable() {
                                         @Override
@@ -186,8 +204,10 @@ class PushGeofenceEventTask implements CTGeofenceTask {
 
                             } else {
 
+                                // send event to CleverTap SDK
                                 future = cleverTapApi.pushGeoFenceExitedEvent(geofence);
 
+                                // send event to Listener on main thread
                                 if (ctGeofenceEventsListener != null) {
                                     com.clevertap.android.sdk.Utils.runOnUiThread(new Runnable() {
                                         @Override

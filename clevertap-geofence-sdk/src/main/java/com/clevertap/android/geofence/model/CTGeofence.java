@@ -12,6 +12,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Wrapper over {@link com.google.android.gms.location.Geofence}
+ */
 public class CTGeofence {
 
     private final int transitionType;
@@ -85,6 +88,11 @@ public class CTGeofence {
         return radius;
     }
 
+    /**
+     * Converts {@link JSONObject} containing an array of geofences to list of {@link CTGeofence}
+     * @param jsonObject containing an array of geofences
+     * @return list of {@link CTGeofence}
+     */
     @NonNull public static List<CTGeofence> from(@NonNull JSONObject jsonObject) {
 
         ArrayList<CTGeofence> geofenceList = new ArrayList<>();

@@ -13,8 +13,8 @@ import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 
 /**
- * Avoids duplicate request of location updates and
- * Requests/Removes Location updates based on change in config settings.
+ * A task of type {@link CTGeofenceTask} responsible for requesting or removing background
+ * location updates by comparing {@link CTGeofenceSettings} and {@link PendingIntent}
  */
 class LocationUpdateTask implements CTGeofenceTask {
 
@@ -32,6 +32,11 @@ class LocationUpdateTask implements CTGeofenceTask {
         ctLocationAdapter = CTGeofenceAPI.getInstance(this.context).getCtLocationAdapter();
     }
 
+    /**
+     * Writes new {@link CTGeofenceSettings} to file. Requests/Removes Location updates based on change
+     * in config settings and avoids duplicate request of location updates if pending intent
+     * already exists in the system and is active
+     */
     @WorkerThread
     @Override
     public void execute() {
@@ -75,6 +80,15 @@ class LocationUpdateTask implements CTGeofenceTask {
                 "Finished executing LocationUpdateTask");
     }
 
+    /**
+     * Helper method for comparing old {@link CTGeofenceSettings} stored in file with current one to
+     * determine if location update request is required.
+     *
+     * @param locationPendingIntent instance of {@link PendingIntent} of type
+     * {@link PendingIntentFactory#PENDING_INTENT_GEOFENCE} or {@link PendingIntentFactory#PENDING_INTENT_LOCATION}
+     *
+     * @return true if location update request is required else false
+     */
     private boolean isRequestLocation(PendingIntent locationPendingIntent) {
 
         int lastAccuracy = -1;

@@ -13,10 +13,23 @@ import java.util.concurrent.TimeoutException;
 
 import static com.clevertap.android.geofence.CTGeofenceAPI.GEOFENCE_LOG_TAG;
 
+/**
+ * A {@link BroadcastReceiver} which will reset geofence monitoring and location updates on device boot
+ */
 public class CTGeofenceBootReceiver extends BroadcastReceiver {
 
+    /**
+     * Timeout to prevent ANR
+     */
     private static final long BROADCAST_INTENT_TIME_MS = 3000;
 
+    /**
+     * Validates necessary location permissions and creates {@link GeofenceUpdateTask} and
+     * {@link LocationUpdateTask} to sends it to Queue
+     * using {@link CTGeofenceTaskManager}
+     * @param context application {@link Context}
+     * @param intent an instance of {@link Intent}
+     */
     @MainThread
     @Override
     public void onReceive(final Context context, Intent intent) {

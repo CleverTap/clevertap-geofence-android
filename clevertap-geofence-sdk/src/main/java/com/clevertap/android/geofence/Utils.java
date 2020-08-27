@@ -27,6 +27,13 @@ class Utils {
     private static Boolean isFusedLocationDependencyAvailable;
     private static Boolean isConcurrentFuturesDependencyAvailable;
 
+    /**
+     * Checks if Application has provided permission
+     *
+     * @param context application {@link Context}
+     * @param permission for example, {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * @return
+     */
     static boolean hasPermission(final Context context, String permission) {
         try {
             return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(context, permission);
@@ -116,6 +123,12 @@ class Utils {
         return str == null ? "" : str;
     }
 
+    /**
+     * Converts {@link JSONObject} to list of {@link com.google.android.gms.location.Geofence} Ids
+     *
+     * @param jsonObject containing geofence list
+     * @return list of {@link com.google.android.gms.location.Geofence} Ids
+     */
     static List<String> jsonToGeoFenceList(@NonNull JSONObject jsonObject) {
         ArrayList<String> geofenceIdList = new ArrayList<>();
         try {
@@ -134,6 +147,14 @@ class Utils {
         return geofenceIdList;
     }
 
+    /**
+     * Reads {@link CTGeofenceSettings} from file.
+     * <br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param context application {@link Context}
+     * @return {@link CTGeofenceSettings}, null if no settings found in file
+     */
     @WorkerThread
     @Nullable
     static CTGeofenceSettings readSettingsFromFile(@NonNull Context context) {
@@ -177,6 +198,14 @@ class Utils {
 
     }
 
+    /**
+     * Writes {@link CTGeofenceSettings} to file.
+     * <br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param context application {@link Context}
+     * @param ctGeofenceSettings new {@link CTGeofenceSettings}
+     */
     @WorkerThread
     static void writeSettingsToFile(Context context, @NonNull CTGeofenceSettings ctGeofenceSettings) {
 
@@ -217,6 +246,15 @@ class Utils {
 
     }
 
+    /**
+     * Creates {@link com.clevertap.android.sdk.CleverTapAPI} instance if it's null and initializes
+     * Geofence SDK, mostly in killed state.
+     * <br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param context application {@link Context}
+     * @return true if geofence sdk initialized successfully, false otherwise
+     */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @WorkerThread
     static boolean initCTGeofenceApiIfRequired(@NonNull Context context) {
@@ -245,6 +283,16 @@ class Utils {
         return true;
     }
 
+    /**
+     * Creates sub array from provided {@link JSONArray}
+     *
+     * @param arr {@link JSONArray}
+     * @param fromIndex fromIndex
+     * @param toIndex toIndex
+     * @return sub array exclusive of toIndex
+     *
+     * @throws IllegalStateException if fromIndex > toIndex
+     */
     @NonNull
     static JSONArray subArray(@NonNull JSONArray arr, int fromIndex, int toIndex) {
 
@@ -269,6 +317,12 @@ class Utils {
         return BuildConfig.VERSION_CODE;
     }
 
+    /**
+     * Notifies Listener for location update on main thread through {@link CTLocationUpdatesListener}
+     *
+     * @param context application {@link Context}
+     * @param location instance of {@link Location}
+     */
     static void notifyLocationUpdates(@NonNull Context context, @Nullable final Location location) {
         final CTLocationUpdatesListener ctLocationUpdatesListener = CTGeofenceAPI.getInstance(context)
                 .getCtLocationUpdatesListener();

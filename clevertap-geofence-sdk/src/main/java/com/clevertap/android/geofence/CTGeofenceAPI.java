@@ -28,6 +28,12 @@ import static com.clevertap.android.geofence.CTGeofenceConstants.DEFAULT_LONGITU
 import static com.clevertap.android.geofence.GoogleLocationAdapter.INTERVAL_IN_MILLIS;
 import static com.clevertap.android.geofence.GoogleLocationAdapter.SMALLEST_DISPLACEMENT_IN_METERS;
 
+/**
+ * Main Entry point for communicating with Geofence SDK.<br>
+ * Singleton class Responsible for initializing, activating and deactivating geofence sdk as
+ * requested by applications. It implements {@link GeofenceCallback} to communicate with CleverTap SDK
+ * for location pings and update of new geofence list.
+ */
 public class CTGeofenceAPI implements GeofenceCallback {
 
     public static final String GEOFENCE_LOG_TAG = "CTGeofence";
@@ -70,6 +76,11 @@ public class CTGeofenceAPI implements GeofenceCallback {
         logger = new Logger(Logger.DEBUG);
     }
 
+    /**
+     * Retrieves the {@code default} singleton instance of {@link CTGeofenceAPI}.
+     * @param context A {@link Context} for Application
+     * @return The singleton instance of {@link CTGeofenceAPI}
+     */
     @SuppressWarnings("WeakerAccess")
     @NonNull
     public static CTGeofenceAPI getInstance(@NonNull Context context) {
@@ -83,7 +94,13 @@ public class CTGeofenceAPI implements GeofenceCallback {
         return ctGeofenceAPI;
     }
 
-
+    /**
+     * Initializes and activates SDK with provided {@link CTGeofenceSettings} and {@link CleverTapAPI}
+     * instance.
+     * @param ctGeofenceSettings instance of {@link CTGeofenceSettings}.Can be null in which case
+     *                           default settings will be applied.
+     * @param cleverTapAPI NonNull instance of  {@link CleverTapAPI}.
+     */
     public void init(CTGeofenceSettings ctGeofenceSettings, @NonNull CleverTapAPI cleverTapAPI) {
 
         if (ctLocationAdapter == null || ctGeofenceAdapter == null) {
@@ -97,9 +114,9 @@ public class CTGeofenceAPI implements GeofenceCallback {
     }
 
     /**
-     * Set geofence API configuration settings
+     * Sets geofence API configuration settings with provided {@link CTGeofenceSettings}
      *
-     * @param ctGeofenceSettings - Object of {@link CTGeofenceSettings}
+     * @param ctGeofenceSettings instance of {@link CTGeofenceSettings}
      */
     @SuppressWarnings("unused")
     private void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
@@ -113,16 +130,20 @@ public class CTGeofenceAPI implements GeofenceCallback {
         this.ctGeofenceSettings = ctGeofenceSettings;
     }
 
-
+    /**
+     * Sets {@link CleverTapAPI} instance to be used by SDK
+     *
+     * @param cleverTapAPI instance of {@link CleverTapAPI}
+     */
     @SuppressWarnings("unused")
     private void setCleverTapApi(CleverTapAPI cleverTapAPI) {
         this.cleverTapAPI = cleverTapAPI;
     }
 
     /**
-     * Listener for Geofence SDK initialize
+     * Sets {@link OnGeofenceApiInitializedListener} for Geofence SDK initialized callback on main thread
      *
-     * @param onGeofenceApiInitializedListener - Object of {@link OnGeofenceApiInitializedListener}
+     * @param onGeofenceApiInitializedListener instance of {@link OnGeofenceApiInitializedListener}
      */
     @SuppressWarnings("unused")
     public void setOnGeofenceApiInitializedListener(
@@ -131,9 +152,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
     }
 
     /**
-     * set clevertap account id
+     * Sets CleverTap account id which will be used by SDK to recreate {@link CleverTapAPI}
+     * instance when an app is in killed state. Error will be sent to CleverTap in case null or empty.
      *
-     * @param accountId clevertap account id
+     * @param accountId CleverTap account id
      */
     @SuppressWarnings("unused")
     private void setAccountId(String accountId) {
@@ -152,7 +174,8 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
 
     /**
-     * Initializes location update receivers and geofence monitoring on background thread by
+     * Activates SDK by registering {@link GeofenceCallback}
+     * and background location updates on background thread by
      * reading config settings if provided or will use default settings.
      */
     @SuppressWarnings("unused")
@@ -182,6 +205,13 @@ public class CTGeofenceAPI implements GeofenceCallback {
         initBackgroundLocationUpdates();
     }
 
+    /**
+     * Creates {@link LocationUpdateTask}(to register location updates) and sends it to Queue using {@link CTGeofenceTaskManager}
+     * if application has {@link Manifest.permission#ACCESS_FINE_LOCATION} permission. SDK initialization
+     * callback({@link OnGeofenceApiInitializedListener#OnGeofenceApiInitialized()}) will be raised as soon as
+     * {@link LocationUpdateTask} finishes it's execution.
+     * @throws IllegalStateException if Geofence SDK is not initialized before calling this method
+     */
     @SuppressWarnings("WeakerAccess")
     public void initBackgroundLocationUpdates() {
 
@@ -227,7 +257,9 @@ public class CTGeofenceAPI implements GeofenceCallback {
     }
 
     /**
-     * unregisters geofences, location updates and cleanup all resources
+     * Unregisters geofences, background location updates and clears file storage and preferences<br>
+     * This operation will be sent to queue and get's executed by background thread using
+     * {@link CTGeofenceTaskManager}
      */
     @SuppressWarnings("unused")
     public void deactivate() {
@@ -267,6 +299,14 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
     }
 
+    /**
+     * Creates {@link GeofenceUpdateTask}(to register list of geofences) and sends it to Queue using
+     * {@link CTGeofenceTaskManager} if application has {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * and {@link Manifest.permission#ACCESS_BACKGROUND_LOCATION} permissions.<br>
+     * This method is for internal usage only, apps must not call this externally.
+     *
+     * @param fenceList instance of {@link JSONObject} containing geofence list to register to OS
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Override
     public void handleGeoFences(JSONObject fenceList) {
@@ -308,7 +348,12 @@ public class CTGeofenceAPI implements GeofenceCallback {
     }
 
     /**
-     * fetches last location from FusedLocationAPI
+     * Fetches last known location from OS and delivers it to APP through {@link CTLocationUpdatesListener}
+     * if application has {@link Manifest.permission#ACCESS_FINE_LOCATION} permission.<br>
+     * Fetched Location will be passed to {@link #processTriggeredLocation(Location)} to send it to
+     * server for latest geofence list
+     *
+     * @throws IllegalStateException if Geofence SDK is not initialized before calling this method
      */
     @SuppressWarnings("unused")
     @Override
@@ -357,7 +402,17 @@ public class CTGeofenceAPI implements GeofenceCallback {
 
     }
 
-    Future<?> processTriggeredLocation(@NonNull Location location) {
+    /**
+     * Sends Location to CleverTap SDK to send it to server with throttling limit of {@code minimum
+     * 30 minutes} and {@code minimum displacement of 200 meters} between two location pings.<br>
+     * Throttling logic is determined by comparing last pinged location and current one using
+     * shared preferences
+     *
+     * @param location instance of {@link Location}, must be nonnull
+     * @return a Future representing pending completion of the task of sending location to server,
+     * can be null if CleverTap SDK decides not to send it to server
+     */
+    @Nullable Future<?> processTriggeredLocation(@NonNull Location location) {
         Future<?> future = null;
 
         try {
@@ -409,6 +464,10 @@ public class CTGeofenceAPI implements GeofenceCallback {
         return future;
     }
 
+    /**
+     * Creates default instance of {@link CTGeofenceSettings}
+     * @return default instance of {@link CTGeofenceSettings}
+     */
     @NonNull
     CTGeofenceSettings initDefaultConfig() {
         return new CTGeofenceSettings.Builder().build();

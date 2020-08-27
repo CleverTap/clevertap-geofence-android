@@ -7,16 +7,32 @@ import android.content.Intent;
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.android.gms.location.LocationResult;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * A {@link BroadcastReceiver} which receives location updates in foreground as well as in background
+ * and in killed state. This will be active when location fetch mode set by client is
+ * {@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC}<br>
+ * Accuracy and Frequency of location updates depends on accuracy, interval, fastest interval and
+ * smallest displacement as set by Client through {@link CTGeofenceAPI#init(CTGeofenceSettings, CleverTapAPI)}
+ */
 public class CTLocationUpdateReceiver extends BroadcastReceiver {
 
+    /**
+     * Timeout to prevent ANR
+     */
     private static final long BROADCAST_INTENT_TIME_MS = 8000;
 
+    /**
+     * Creates {@link PushLocationEventTask} and sends it to Queue using {@link CTGeofenceTaskManager}
+     * @param context application {@link Context}
+     * @param intent an instance of {@link Intent} containing current location of user
+     */
     @MainThread
     @Override
     public void onReceive(final Context context, final Intent intent) {

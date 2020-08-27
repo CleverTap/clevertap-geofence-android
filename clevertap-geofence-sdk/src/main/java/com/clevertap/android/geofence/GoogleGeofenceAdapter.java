@@ -22,6 +22,10 @@ import java.util.List;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
+/**
+ * Communicates with {@link GeofencingClient} to
+ * Register and Unregister geofences to and from OS respectively
+ */
 class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = Geofence.NEVER_EXPIRE;
@@ -33,6 +37,14 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         geofencingClient = LocationServices.getGeofencingClient(this.context);
     }
 
+    /**
+     * Registers list of geofences to OS for monitoring, using {@link GeofencingClient}
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param fenceList list of {@link CTGeofence}
+     * @param onSuccessListener callback for successful registration to OS
+     */
     @SuppressWarnings("unchecked")
     @WorkerThread
     @Override
@@ -65,7 +77,14 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
 
     }
 
-
+    /**
+     * Unregisters list of geofences from OS to stop monitoring, using {@link GeofencingClient}
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param fenceIdList list of {@link CTGeofence} Ids to unregister
+     * @param onSuccessListener callback for successful removal of Geofences from OS
+     */
     @SuppressWarnings("unchecked")
     @WorkerThread
     @Override
@@ -91,6 +110,14 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         }
     }
 
+    /**
+     * Same as {@link #removeAllGeofence(List, OnSuccessListener)} but uses {@link PendingIntent}
+     * of type {@link PendingIntentFactory#PENDING_INTENT_GEOFENCE}
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param pendingIntent of type {@link PendingIntentFactory#PENDING_INTENT_GEOFENCE}
+     */
     @WorkerThread
     @Override
     public void stopGeofenceMonitoring(@Nullable final PendingIntent pendingIntent) {
@@ -118,6 +145,13 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
         }
     }
 
+    /**
+     * Builds an instance of {@link GeofencingRequest} using list of {@link Geofence} and
+     * {@link GeofencingRequest#INITIAL_TRIGGER_ENTER}
+     *
+     * @param googleFenceList list of {@link Geofence}
+     * @return an instance of {@link GeofencingRequest}
+     */
     private GeofencingRequest getGeofencingRequest(ArrayList<Geofence> googleFenceList) {
         return new GeofencingRequest.Builder()
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
@@ -125,6 +159,13 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
                 .build();
     }
 
+    /**
+     * Converts list of {@link CTGeofence} to list of {@link Geofence} that can be used to build
+     * an instance of {@link GeofencingRequest}
+     *
+     * @param fenceList list of {@link CTGeofence}
+     * @return list of {@link Geofence}
+     */
     @NonNull
     private ArrayList<Geofence> getGoogleGeofences(@NonNull List<CTGeofence> fenceList) {
         ArrayList<Geofence> googleFenceList = new ArrayList<>();

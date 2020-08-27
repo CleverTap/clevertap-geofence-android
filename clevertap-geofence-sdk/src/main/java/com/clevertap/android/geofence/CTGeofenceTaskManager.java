@@ -1,7 +1,6 @@
 package com.clevertap.android.geofence;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.clevertap.android.geofence.interfaces.CTGeofenceTask;
 
@@ -40,8 +39,9 @@ class CTGeofenceTaskManager {
      * Use this to safely post a runnable to the async handler.
      * It adds try/catch blocks around the runnable and the handler itself.
      *
-     * @param name     unique name to identify task
-     * @param runnable Task to submit to queue
+     * @param name unique name to identify task
+     * @param runnable runnable to submit to queue
+     * @return a Future representing pending completion of the runnable, can be null in case of nested calls
      */
     @SuppressWarnings("UnusedParameters")
     @Nullable
@@ -79,6 +79,7 @@ class CTGeofenceTaskManager {
      *
      * @param name unique name to identify task
      * @param task Task to submit to queue
+     * @return a Future representing pending completion of the task, can be null in case of nested calls
      */
     @SuppressWarnings("UnusedParameters")
     @Nullable

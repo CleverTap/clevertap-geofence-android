@@ -17,7 +17,8 @@ import org.json.JSONObject;
 import java.util.List;
 
 /**
- * Adds/Replaces(remove followed by add) Geofences into file and Geofence Client
+ * A task of type {@link CTGeofenceTask} responsible for Adding/Replacing(remove followed by add)
+ * Geofences into file and OS
  */
 class GeofenceUpdateTask implements CTGeofenceTask {
 
@@ -34,6 +35,9 @@ class GeofenceUpdateTask implements CTGeofenceTask {
         ctGeofenceAdapter = CTGeofenceAPI.getInstance(this.context).getCtGeofenceAdapter();
     }
 
+    /**
+     * Initiates {@link GeofenceUpdateTask} execution
+     */
     @WorkerThread
     @Override
     public void execute() {
@@ -87,10 +91,11 @@ class GeofenceUpdateTask implements CTGeofenceTask {
     }
 
     /**
-     * Extract top n geofences as requested by User through
+     * Extracts top n geofences from provided {@link JSONObject} as requested by User through
      * {@link com.clevertap.android.geofence.CTGeofenceSettings.Builder#setGeofenceMonitoringCount(int)}
-     * and store it to file followed by registration through
+     * and store it to file followed by registration to OS through
      * {@link GoogleGeofenceAdapter#addAllGeofence(List, OnSuccessListener)}
+     * <br>Caller will be notified on registration of the geofences through {@link OnCompleteListener}
      *
      * @param geofenceObject json response containing list of geofences
      */

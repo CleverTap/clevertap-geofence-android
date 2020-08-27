@@ -11,8 +11,9 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.clevertap.android.geofence.interfaces.CTLocationCallback;
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
+import com.clevertap.android.geofence.interfaces.CTLocationCallback;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -25,17 +26,45 @@ import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.clevertap.android.geofence.CTGeofenceConstants.TAG_WORK_LOCATION_UPDATES;
 
+/**
+ * Communicates with {@link FusedLocationProviderClient} and {@link WorkManager} to
+ * Request/Remove Location updates based on Location fetch modes -
+ * ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC}) or
+ * ({@link CTGeofenceSettings#FETCH_LAST_LOCATION_PERIODIC}) and config settings
+ */
 class GoogleLocationAdapter implements CTLocationAdapter {
 
+    /**
+     * Applicable for both fetch modes ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC}) and
+     * ({@link CTGeofenceSettings#FETCH_LAST_LOCATION_PERIODIC})
+     */
     static final long INTERVAL_IN_MILLIS = 30 * 60 * 1000;
+
+    /**
+     * Applicable only for ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC})
+     */
     static final long INTERVAL_FASTEST_IN_MILLIS = 30 * 60 * 1000;
+
+    /**
+     * Applicable only for ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC})
+     */
     static final float SMALLEST_DISPLACEMENT_IN_METERS = 200;
+
+    /**
+     * Applicable only for ({@link CTGeofenceSettings#FETCH_LAST_LOCATION_PERIODIC})
+     */
     private static final long FLEX_INTERVAL_IN_MILLIS = 10 * 60 * 1000;
+
     private final Context context;
     private final FusedLocationProviderClient fusedProviderClient;
     private boolean backgroundLocationUpdatesEnabled;
     private int locationFetchMode;
+
+    /**
+     * Applicable only for ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC})
+     */
     private int locationAccuracy = LocationRequest.PRIORITY_HIGH_ACCURACY;
+
     private long interval;
     private long fastestInterval;
     private float smallestDisplacement;
@@ -45,6 +74,14 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         fusedProviderClient = LocationServices.getFusedLocationProviderClient(this.context);
     }
 
+    /**
+     * Communicates with {@link FusedLocationProviderClient} and {@link WorkManager} to
+     * Request/Remove Location updates based on Location fetch modes -
+     * ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC}) or
+     * ({@link CTGeofenceSettings#FETCH_LAST_LOCATION_PERIODIC}) and config settings
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     */
     @WorkerThread
     @Override
     public void requestLocationUpdates() {
@@ -103,6 +140,10 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         }
     }
 
+    /**
+     * Schedules Periodic Location Update work request using config settings,
+     * if work manager dependencies available
+     */
     private void scheduleManualLocationUpdates() {
 
         if (!Utils.isConcurrentFuturesDependencyAvailable()) {
@@ -143,6 +184,15 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         }
     }
 
+    /**
+     * Helper method to remove location updates for both fetch modes ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC}) and
+     *({@link CTGeofenceSettings#FETCH_LAST_LOCATION_PERIODIC})
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param pendingIntent instance of {@link PendingIntent} of type
+     * {@link PendingIntentFactory#PENDING_INTENT_LOCATION}
+     */
     @WorkerThread
     @Override
     public void removeLocationUpdates(@Nullable PendingIntent pendingIntent) {
@@ -150,6 +200,14 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         clearLocationWorkRequest();
     }
 
+    /**
+     * Gets last known location from {@link FusedLocationProviderClient} and delivers it to caller
+     * through {@link CTLocationCallback}
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     *
+     * @param callback instance of {@link CTLocationCallback}
+     */
     @WorkerThread
     @Override
     public void getLastLocation(@NonNull final CTLocationCallback callback) {
@@ -182,6 +240,11 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
     }
 
+    /**
+     * Builds an instance of {@link LocationRequest} using config settings
+     *
+     * @return an instance of {@link LocationRequest}
+     */
     private LocationRequest getLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(interval);
@@ -192,6 +255,11 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         return locationRequest;
     }
 
+    /**
+     * Retrieves config settings from {@link CTGeofenceSettings} provided by client through
+     * {@link CTGeofenceAPI#init(CTGeofenceSettings, CleverTapAPI)}
+     * @param context application {@link Context}
+     */
     private void applySettings(Context context) {
         CTGeofenceSettings geofenceSettings = CTGeofenceAPI.getInstance(context).getGeofenceSettings();
 
@@ -219,6 +287,9 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         }
     }
 
+    /**
+     * Removes Periodic Location Update work request
+     */
     private void clearLocationWorkRequest() {
 
         if (!Utils.isConcurrentFuturesDependencyAvailable()) {
@@ -246,6 +317,12 @@ class GoogleLocationAdapter implements CTLocationAdapter {
         }
     }
 
+    /**
+     * Removes Location Update of type ({@link CTGeofenceSettings#FETCH_CURRENT_LOCATION_PERIODIC})
+     * using {@link FusedLocationProviderClient}
+     * <br><br>
+     * <b>Must be called from background thread</b>
+     */
     @WorkerThread
     private void clearLocationUpdates(@Nullable PendingIntent pendingIntent) {
         if (pendingIntent == null) {

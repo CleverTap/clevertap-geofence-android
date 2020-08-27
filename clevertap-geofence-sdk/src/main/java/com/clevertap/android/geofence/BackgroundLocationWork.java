@@ -11,17 +11,30 @@ import androidx.work.WorkerParameters;
 
 import com.clevertap.android.geofence.interfaces.CTLocationAdapter;
 import com.clevertap.android.geofence.interfaces.CTLocationCallback;
+import com.clevertap.android.geofence.interfaces.CTLocationUpdatesListener;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Future;
 
+/**
+ * A {@link ListenableWorker} which fetches last known location from OS in foreground as well as in background
+ * and in killed state. This will be active when location fetch mode set by client is
+ * {@link CTGeofenceSettings#FETCH_LAST_LOCATION_PERIODIC}<br>
+ * Frequency of location updates depends on {@link CTGeofenceSettings.Builder#setInterval(long)}
+ */
 public class BackgroundLocationWork extends ListenableWorker {
 
     public BackgroundLocationWork(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
+    /**
+     * Fetches last known location from OS and delivers it to APP through {@link CTLocationUpdatesListener}
+     * <br>
+     * Fetched Location will be passed to {@link CTGeofenceAPI#processTriggeredLocation(Location)} to send it to
+     * server for latest geofence list
+     */
     @NonNull
     @Override
     public ListenableFuture<Result> startWork() {
