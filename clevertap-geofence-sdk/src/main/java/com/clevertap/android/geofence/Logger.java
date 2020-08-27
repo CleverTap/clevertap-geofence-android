@@ -43,11 +43,9 @@ public final class Logger {
         if (debugLevel > INFO) {
             if (message.length() > 4000) {
                 Log.d(CTGeofenceAPI.GEOFENCE_LOG_TAG + ":" + suffix, message.substring(0, 4000));
-                com.orhanobut.logger.Logger.t(CTGeofenceAPI.GEOFENCE_LOG_TAG).d(message.substring(0, 4000));
                 debug(suffix, message.substring(4000));
             } else {
                 Log.d(CTGeofenceAPI.GEOFENCE_LOG_TAG + ":" + suffix, message);
-                com.orhanobut.logger.Logger.t(CTGeofenceAPI.GEOFENCE_LOG_TAG).d(message);
             }
         }
     }
@@ -79,11 +77,9 @@ public final class Logger {
         if (debugLevel > DEBUG) {
             if (message.length() > 4000) {
                 Log.v(CTGeofenceAPI.GEOFENCE_LOG_TAG + ":" + suffix, message.substring(0, 4000));
-                com.orhanobut.logger.Logger.t(CTGeofenceAPI.GEOFENCE_LOG_TAG).d( message.substring(0, 4000));
                 verbose(suffix, message.substring(4000));
             } else {
                 Log.v(CTGeofenceAPI.GEOFENCE_LOG_TAG + ":" + suffix, message);
-                com.orhanobut.logger.Logger.t(CTGeofenceAPI.GEOFENCE_LOG_TAG).d(message);
             }
         }
     }

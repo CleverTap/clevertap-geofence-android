@@ -81,7 +81,6 @@ public class FileUtils {
             content = stringBuilder.toString();
         } catch (Exception e) {
             CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG, "[Exception While Reading: " + e.getLocalizedMessage());
-            //Log your error with Log.e
         }
         return content;
     }
@@ -109,6 +108,7 @@ public class FileUtils {
         }
     }
 
+    @SuppressWarnings("UnusedParameters")
     static String getCachedDirName(Context context) {
         return CTGeofenceConstants.CACHED_DIR_NAME /*+ "_" + CTGeofenceAPI.getInstance(context).getAccountId()
                 + "_" + CTGeofenceAPI.getInstance(context).getGuid()*/;

@@ -122,7 +122,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
     private void setGeofenceSettings(CTGeofenceSettings ctGeofenceSettings) {
 
         if (this.ctGeofenceSettings != null) {
-            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            logger.verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Settings already configured");
             return;
         }
@@ -186,7 +186,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
         }
 
         if (isActivated) {
-            logger.debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            logger.verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "Geofence API already activated! dropping activate() call");
             return;
         }

@@ -72,7 +72,7 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
                             return;
                         }
 
-                        CTGeofenceAPI.getLogger().debug(GEOFENCE_LOG_TAG,
+                        CTGeofenceAPI.getLogger().info(GEOFENCE_LOG_TAG,
                                 "registering geofences after device reboot");
 
                         // pass null GeofenceList to register old fences stored in file
@@ -95,7 +95,7 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
                             e.printStackTrace();
                         }
 
-                        CTGeofenceAPI.getLogger().debug(GEOFENCE_LOG_TAG,
+                        CTGeofenceAPI.getLogger().info(GEOFENCE_LOG_TAG,
                                 "registering location updates after device reboot");
 
                         LocationUpdateTask locationUpdateTask = new LocationUpdateTask(applicationContext);

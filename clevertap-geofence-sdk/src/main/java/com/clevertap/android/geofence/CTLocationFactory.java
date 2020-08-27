@@ -28,11 +28,11 @@ class CTLocationFactory {
         int googlePlayServicesAvailable = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);
 
         if (Utils.isFusedLocationApiDependencyAvailable()) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            CTGeofenceAPI.getLogger().info(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "FusedLocationApi dependency is available");
 
             if (googlePlayServicesAvailable == ConnectionResult.SUCCESS) {
-                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                CTGeofenceAPI.getLogger().info(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                         "Play service APK is available");
                 return new GoogleLocationAdapter(context.getApplicationContext());
             } else {

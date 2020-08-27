@@ -147,7 +147,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     private void scheduleManualLocationUpdates() {
 
         if (!Utils.isConcurrentFuturesDependencyAvailable()) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            CTGeofenceAPI.getLogger().info(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "concurrent-futures dependency is missing");
             if(CTGeofenceAPI.getInstance(context).getCleverTapApi() != null){
                 CTGeofenceAPI.getInstance(context)
@@ -175,7 +175,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
                     "Finished scheduling periodic last location request..");
 
         } catch (NoClassDefFoundError t) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            CTGeofenceAPI.getLogger().info(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "WorkManager dependency is missing");
         } catch (Throwable t) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
@@ -293,7 +293,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
     private void clearLocationWorkRequest() {
 
         if (!Utils.isConcurrentFuturesDependencyAvailable()) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            CTGeofenceAPI.getLogger().info(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "concurrent-futures dependency is missing");
             return;
         }
@@ -308,7 +308,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
                     "Successfully removed periodic last location request");
 
         } catch (NoClassDefFoundError t) {
-            CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+            CTGeofenceAPI.getLogger().info(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                     "WorkManager dependency is missing");
         } catch (Throwable t) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,

@@ -219,12 +219,12 @@ class PushGeofenceEventTask implements CTGeofenceTask {
                             }
 
                             try {
-                                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                         "Calling future for geofence event with id = " +
                                                 triggeredGeofence.getRequestId());
                                 future.get();
 
-                                CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG,
+                                CTGeofenceAPI.getLogger().verbose(CTGeofenceAPI.GEOFENCE_LOG_TAG,
                                         "Finished calling future for geofence event with id = " +
                                                 triggeredGeofence.getRequestId());
                             } catch (Exception e) {
