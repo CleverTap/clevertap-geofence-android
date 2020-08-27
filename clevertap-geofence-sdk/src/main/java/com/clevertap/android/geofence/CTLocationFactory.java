@@ -22,6 +22,7 @@ class CTLocationFactory {
      * @throws IllegalStateException if play-services-location dependency is missing or Play service APK
      * error is reported by GoogleApi.
      */
+    //TODO add throws statement
     static CTLocationAdapter createLocationAdapter(@NonNull Context context) {
 
         int googlePlayServicesAvailable = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);

@@ -28,6 +28,7 @@ class PendingIntentFactory {
      * @param flags {@link PendingIntent#FLAG_NO_CREATE} or {@link PendingIntent#FLAG_UPDATE_CURRENT}
      * @return
      */
+    //TODO throws exception
     @Nullable
     static PendingIntent getPendingIntent(@Nullable Context context, int pendingIntentType, int flags) {
 

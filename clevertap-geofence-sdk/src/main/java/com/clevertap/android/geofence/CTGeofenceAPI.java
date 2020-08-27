@@ -285,6 +285,7 @@ public class CTGeofenceAPI implements GeofenceCallback {
                 FileUtils.deleteDirectory(context, FileUtils.getCachedDirName(context));
 
                 // reset preference
+                //TODO can commit
                 GeofenceStorageHelper.putDouble(context
                         , CTGeofenceConstants.KEY_LATITUDE, DEFAULT_LATITUDE);
                 GeofenceStorageHelper.putDouble(context
