@@ -44,7 +44,7 @@ public final class GeofenceStorageHelper {
 
     static void persist(final SharedPreferences.Editor editor) {
         try {
-            editor.apply();
+            editor.commit();
         } catch (Throwable t) {
             CTGeofenceAPI.getLogger().debug(CTGeofenceAPI.GEOFENCE_LOG_TAG, "CRITICAL: Failed to persist shared preferences!");
         }

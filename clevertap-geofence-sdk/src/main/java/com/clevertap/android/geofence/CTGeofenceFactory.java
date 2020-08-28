@@ -22,7 +22,6 @@ class CTGeofenceFactory {
      * @throws IllegalStateException if play-services-location dependency is missing or Play service APK
      * error is reported by GoogleApi.
      */
-    //TODO throws in signature
     static CTGeofenceAdapter createGeofenceAdapter(@NonNull Context context) {
 
         int googlePlayServicesAvailable = GoogleApiAvailability.getInstance().

@@ -261,7 +261,6 @@ class Utils {
 
         CTGeofenceAPI ctGeofenceAPI = CTGeofenceAPI.getInstance(context);
 
-        //TODO if already init can we avoid reading file overhead and abort init process.
         if (ctGeofenceAPI.getCleverTapApi() == null) {
             CTGeofenceSettings ctGeofenceSettings = Utils.readSettingsFromFile(context);
             if (ctGeofenceSettings == null) {
@@ -295,7 +294,6 @@ class Utils {
      * @throws IllegalStateException if fromIndex > toIndex
      */
     @NonNull
-    //TODO add throws statement, arr size is not in range
     static JSONArray subArray(@NonNull JSONArray arr, int fromIndex, int toIndex) {
 
         if (fromIndex > toIndex)

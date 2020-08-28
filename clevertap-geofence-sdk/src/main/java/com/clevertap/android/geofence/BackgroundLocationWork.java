@@ -85,7 +85,6 @@ public class BackgroundLocationWork extends ListenableWorker {
                     }
                 };
 
-                //TODO check->already running in bg thread-> need of new thread?
                 CTGeofenceTaskManager.getInstance().postAsyncSafely("ProcessLocationWork",
                         new Runnable() {
                             @Override
