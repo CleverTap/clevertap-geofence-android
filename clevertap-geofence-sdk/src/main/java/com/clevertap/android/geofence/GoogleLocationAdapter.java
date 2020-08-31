@@ -1,5 +1,6 @@
 package com.clevertap.android.geofence;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
@@ -115,6 +116,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
             try {
                 // will overwrite location request if change in location config is detected
+                @SuppressLint("MissingPermission")
                 Task<Void> requestLocationUpdatesTask = fusedProviderClient.requestLocationUpdates(getLocationRequest(), pendingIntent);
 
                 // blocking task
@@ -217,6 +219,7 @@ class GoogleLocationAdapter implements CTLocationAdapter {
 
         Location location = null;
         try {
+            @SuppressLint("MissingPermission")
             Task<Location> lastLocation = fusedProviderClient.getLastLocation();
 
             // blocking task

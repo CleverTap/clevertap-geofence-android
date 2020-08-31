@@ -1,5 +1,6 @@
 package com.clevertap.android.geofence;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 
@@ -62,6 +63,7 @@ class GoogleGeofenceAdapter implements CTGeofenceAdapter {
             PendingIntent geofencePendingIntent = PendingIntentFactory.getPendingIntent(context,
                     PendingIntentFactory.PENDING_INTENT_GEOFENCE, FLAG_UPDATE_CURRENT);
 
+            @SuppressLint("MissingPermission")
             Task<Void> addGeofenceTask = geofencingClient.addGeofences(getGeofencingRequest(googleFenceList), geofencePendingIntent);
             // blocking task
             aVoid = Tasks.await(addGeofenceTask);
