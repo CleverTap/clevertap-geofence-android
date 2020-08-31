@@ -61,7 +61,6 @@ public class CTGeofenceBootReceiver extends BroadcastReceiver {
 
             final PendingResult result = goAsync();
 
-            //TODO discuss a way to avoid this
             Thread thread = new Thread() {
                 public void run() {
                     try {

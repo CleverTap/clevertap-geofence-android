@@ -93,7 +93,6 @@ public class CTGeofence {
      * @param jsonObject containing an array of geofences
      * @return list of {@link CTGeofence}
      */
-    //TODO check parsing logic if float value of radius is provided
     @NonNull public static List<CTGeofence> from(@NonNull JSONObject jsonObject) {
 
         ArrayList<CTGeofence> geofenceList = new ArrayList<>();

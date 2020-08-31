@@ -83,7 +83,6 @@ class CTGeofenceTaskManager {
      */
     @SuppressWarnings("UnusedParameters")
     @Nullable
-    //TODO if CTGeofenceTask implements runnable we could have reused the above method.
     Future<?> postAsyncSafely(final String name, final CTGeofenceTask task) {
         Future<?> future = null;
         try {

@@ -2,8 +2,6 @@
   <img src="https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/static/clevertap-logo.png" width="230"/>
 </p>
 
-## clevertap-geofence-android
-
 ## Table of contents
 
 * [Introduction](#introduction)
@@ -30,7 +28,7 @@ CleverTap Geofence SDK provides Geofencing capabilities to CleverTap Android SDK
 Add the following dependencies to the ```build.gradle```
 
 ```
-implementation 'com.clevertap.android:geofence:1.0.0'
+implementation 'com.clevertap.android:clevertap-geofence-sdk:1.0.0'
 implementation 'com.clevertap.android:clevertap-android-sdk:3.9.0' // 3.9.0 and above
 implementation 'com.google.android.gms:play-services-location:17.0.0'
 implementation 'androidx.work:work-runtime:2.3.4' // required for FETCH_LAST_LOCATION_PERIODIC
