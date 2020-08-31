@@ -3,36 +3,103 @@ package com.clevertap.android.geofenceapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.clevertap.android.geofence.CTGeofenceAPI;
+import com.clevertap.android.geofence.CTGeofenceSettings;
+import com.clevertap.android.geofence.Logger;
+import com.clevertap.android.geofence.interfaces.CTGeofenceEventsListener;
+import com.clevertap.android.geofence.interfaces.CTLocationUpdatesListener;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+    private Button mBtnInit;
+    private Button mBtnTriggerLocation;
+    private Button mBtnDeactivate;
+    private CleverTapAPI mCleverTapInstance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!checkPermissions())
-        {
-            requestPermissions();
-        }
+        mBtnInit = findViewById(R.id.btnInit);
+        mBtnTriggerLocation = findViewById(R.id.btnTriggerLocation);
+        mBtnDeactivate = findViewById(R.id.btnDeactivate);
+
+        mCleverTapInstance = CleverTapAPI.getDefaultInstance(this);
+        CleverTapAPI.setDebugLevel(10);
+
+        mBtnInit.setOnClickListener(this);
+        mBtnTriggerLocation.setOnClickListener(this);
+        mBtnDeactivate.setOnClickListener(this);
+
+    }
+
+    private void initCTGeofenceApi() {
+        if (mCleverTapInstance == null)
+            return;
+
+        // proceed only if cleverTap instance is not null
+        final Context con = this;
+        CTGeofenceAPI.getInstance(getApplicationContext())
+                .init(new CTGeofenceSettings.Builder()
+                        .enableBackgroundLocationUpdates(true)
+                        .setLogLevel(Logger.DEBUG)
+                        .setLocationAccuracy(CTGeofenceSettings.ACCURACY_HIGH)
+                        .setLocationFetchMode(CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC)
+                        .setGeofenceMonitoringCount(99)
+                        .setInterval(3600000) // 1 hour
+                        .setFastestInterval(1800000) // 30 minutes
+                        .setSmallestDisplacement(1000)// 1 km
+                        .build(), mCleverTapInstance);
+
+        CTGeofenceAPI.getInstance(getApplicationContext())
+                .setOnGeofenceApiInitializedListener(new CTGeofenceAPI.OnGeofenceApiInitializedListener() {
+                    @Override
+                    public void OnGeofenceApiInitialized() {
+                        Toast.makeText(con, "Geofence API initialized", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        CTGeofenceAPI.getInstance(getApplicationContext())
+                .setCtGeofenceEventsListener(new CTGeofenceEventsListener() {
+                    @Override
+                    public void onGeofenceEnteredEvent(JSONObject jsonObject) {
+                        Toast.makeText(con, "Geofence Entered", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onGeofenceExitedEvent(JSONObject jsonObject) {
+                        Toast.makeText(con, "Geofence Exited", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        CTGeofenceAPI.getInstance(getApplicationContext())
+                .setCtLocationUpdatesListener(new CTLocationUpdatesListener() {
+                    @Override
+                    public void onLocationUpdates(Location location) {
+                        Toast.makeText(con, "Location updated", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
@@ -40,11 +107,11 @@ public class MainActivity extends AppCompatActivity {
      * Return the current state of the permissions needed.
      */
     private boolean checkPermissions() {
-        int fineLocationPermissionState = ActivityCompat.checkSelfPermission(
+        int fineLocationPermissionState = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_FINE_LOCATION);
 
-        int backgroundLocationPermissionState = ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        int backgroundLocationPermissionState = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) : PackageManager.PERMISSION_GRANTED;
 
         return (fineLocationPermissionState == PackageManager.PERMISSION_GRANTED) &&
                 (backgroundLocationPermissionState == PackageManager.PERMISSION_GRANTED);
@@ -73,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(View view) {
                             // Request permission
                             ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                                     REQUEST_PERMISSIONS_REQUEST_CODE);
                         }
                     });
@@ -82,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             // sets the permission in a given state or the user denied the permission
             // previously and checked "Never ask again".
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
@@ -97,23 +164,8 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length <= 0) {
                 // If user interaction was interrupted, the permission request is cancelled and you
                 // receive empty arrays.
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1]==PackageManager.PERMISSION_GRANTED) {
-                JSONObject jsonObject=new JSONObject();
-                JSONArray jsonArray=new JSONArray();
-                JSONObject object=new JSONObject();
-                try {
-                    object.put("lat",19.231585);
-                    object.put("lng",72.8464133);
-                    object.put("r",200);
-                    object.put("id",200356);
-
-                    jsonArray.put(object);
-                    jsonObject.put("geofences",jsonArray);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                initCTGeofenceApi();
             } else {
                 // Permission denied.
 
@@ -152,5 +204,34 @@ public class MainActivity extends AppCompatActivity {
                 getString(mainTextStringId),
                 Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(actionStringId), listener).show();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnInit:
+                if (mCleverTapInstance != null) {
+                    // proceed only if cleverTap instance is not null
+                    if (!checkPermissions()) {
+                        requestPermissions();
+                    } else {
+                        initCTGeofenceApi();
+                    }
+                }
+                break;
+            case R.id.btnTriggerLocation:
+                try {
+                    CTGeofenceAPI.getInstance(getApplicationContext()).triggerLocation();
+                } catch (IllegalStateException e) {
+                    // geofence not initialized
+                    e.printStackTrace();
+                    // init geofence
+                    initCTGeofenceApi();
+                }
+                break;
+            case R.id.btnDeactivate:
+                CTGeofenceAPI.getInstance(getApplicationContext()).deactivate();
+                break;
+        }
     }
 }

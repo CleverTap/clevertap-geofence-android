@@ -8,9 +8,6 @@
     <!-- Recommended so that CleverTap knows when to attempt a network call -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
-
     <application
         android:name=".GeofenceApplication"
         android:allowBackup="true"
@@ -23,10 +20,10 @@
 
         <meta-data
             android:name="CLEVERTAP_ACCOUNT_ID"
-            android:value="4RW-Z6Z-485Z"/>
+            android:value="your-account-id"/>
         <meta-data
             android:name="CLEVERTAP_TOKEN"
-            android:value="161-024"/>
+            android:value="your-account-token"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
