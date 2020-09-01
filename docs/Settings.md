@@ -11,8 +11,8 @@ Default is `DEBUG`
 ### LocationFetchMode : 
 Default is `FETCH_LAST_LOCATION_PERIODIC`
 
-* **CTGeofenceSettings.FETCH_LAST_LOCATION_PERIODIC** - This value will use Periodic work manager which will fetch last known location from OS periodically(use `setInterval()` to set the interval). Location fetched using this may be less accurate and might be null in case Location is turned off in the device settings, the device never recorded its location or Google Play services on the device have restarted. This will give better battery optimisation with less location accuracy.
-* **CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC** - This value will use Periodic Receiver which will fetch current device location from OS. Accuracy and battery optimisation can vary from high to low based on interval, displacement and accuracy values provided in `CTGeofenceSettings`.
+* **CTGeofenceSettings.FETCH_LAST_LOCATION_PERIODIC** - This value will use Periodic work manager which will fetch **last known location** from OS periodically(use `setInterval()` to set the interval). Location fetched using this may be less accurate and might be null in case Location is turned off in the device settings, the device never recorded its location or Google Play services on the device have restarted. This will give better battery optimisation with less location accuracy.
+* **CTGeofenceSettings.FETCH_CURRENT_LOCATION_PERIODIC** - This value will use Periodic Receiver which will fetch **current device location** from OS. Accuracy and battery optimisation can vary from high to low based on interval, displacement and accuracy values provided in `CTGeofenceSettings`.
 
 ### LocationAccuracy:
 Default is `ACCURACY_HIGH`. Applicable only for `FETCH_CURRENT_LOCATION_PERIODIC`
