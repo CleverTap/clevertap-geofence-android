@@ -2,7 +2,7 @@
   <img src="https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/static/clevertap-logo.png" width="230"/>
 </p>
 
-## Table of contents
+## ⍗ Table of contents
 
 * [Introduction](#introduction)
 * [Installation](#installation)
@@ -17,38 +17,38 @@
 * [FAQ](#faq)
 * [Questions](#questions)
 
-## Introduction
+## 👋 Introduction
 [(Back to top)](#table-of-contents)
 
 CleverTap Geofence SDK provides Geofencing capabilities to CleverTap Android SDK by using the Play Services Location library. If you haven't already configured your project for Play Services, follow the instructions [here](https://developers.google.com/android/guides/google-services-plugin).
 
-## Installation
+## 🎉 Installation
 [(Back to top)](#table-of-contents)
 
-Add the following dependencies to the ```build.gradle```
+Add the following dependencies to the `build.gradle`
 
-```
+```Groovy
 implementation 'com.clevertap.android:clevertap-geofence-sdk:1.0.0'
 implementation 'com.clevertap.android:clevertap-android-sdk:3.9.0' // 3.9.0 and above
 implementation 'com.google.android.gms:play-services-location:17.0.0'
 implementation 'androidx.work:work-runtime:2.3.4' // required for FETCH_LAST_LOCATION_PERIODIC
 implementation 'androidx.concurrent:concurrent-futures:1.0.0' // required for FETCH_LAST_LOCATION_PERIODIC
 ```
-## Manifest Permissions
+## 🔒 Manifest Permissions
 [(Back to top)](#table-of-contents)
 
 In order to start using geofence in your app, the app will need below permissions in `AndroidManifest.xml` which is already added by SDK so you don’t have to add anything in manifest.
-```
+```XML
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 <uses-permission android:name="android.permission.WAKE_LOCK" />
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 ```
 
-## Runtime Location Permission
+## 🔐 Runtime Location Permission
 [(Back to top)](#table-of-contents)
 
-```
+```XML
 android.permission.ACCESS_FINE_LOCATION
 android.permission.ACCESS_BACKGROUND_LOCATION (Required only when requesting background location access on Android 10 (API level 29))
 ```
@@ -56,15 +56,18 @@ android.permission.ACCESS_BACKGROUND_LOCATION (Required only when requesting bac
 Before SDK initialization App will need to prompt users to grant above permissions at runtime. Since users can revoke permissions at any time from the app Settings screen, your app needs to check that it has the permissions it needs every time it runs.
 See [Permissions](https://developer.android.com/preview/features/runtime-permissions.html) and [Location Permissions](https://developer.android.com/training/location/permissions#request-location-access-runtime) for more details.
 
-## Initialization
+## 🚀 Initialization
 [(Back to top)](#table-of-contents)
 
 `CTGeofenceAPI` needs an object of `CTGeofenceSettings` and the object of `CleverTapAPI` to be initialized in the following manner-
 
-```CTGeofenceAPI.getInstance(getApplicationContext()).init(ctGeofenceSettings,cleverTapAPI);```
+```java
+CTGeofenceAPI.getInstance(getApplicationContext()).init(ctGeofenceSettings,cleverTapAPI);
+```
 
 `CTGeofenceSettings` object can be created in the following way -
-```
+
+```java
 CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings.Builder()
                 .enableBackgroundLocationUpdates(bgLocation)//boolean to enable background location updates
                 .setLogLevel(logLevel)//Log Level
@@ -83,27 +86,26 @@ CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings.Builder()
 * CTGeofenceAPI is automatically activated once the init() method has been called.
 * CT Geofence SDK will raise the “Geofence Cluster Entered” and “Geofence Cluster Exited” events automatically. The app cannot raise these methods manually.
 
-## Settings parameters
+## 📖 Settings parameters
 [(Back to top)](#table-of-contents)
 Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/Settings.md)
 
 
-## Trigger Location
+## 📍 Trigger Location
 [(Back to top)](#table-of-contents)
 
 This method fetches last known location from OS (can be null) and delivers it to APP through `CTLocationUpdatesListener`. 
 Detailed info can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/TriggerLocation.md)
 
-```
+```java
 try {
     CTGeofenceAPI.getInstance(getApplicationContext()).triggerLocation();
-}catch (IllegalStateException e)
-{
+} catch (IllegalStateException e) {
     // thrown when this method is called before geofence sdk initiaisation
 }
 ```
 
-## Callbacks/Listeners
+## 📞 Callbacks/Listeners
 [(Back to top)](#table-of-contents)
 
 CleverTap Geofence SDK provides 3 callbacks or listeners on the main thread to the app for more control to the developers.
@@ -111,7 +113,7 @@ CleverTap Geofence SDK provides 3 callbacks or listeners on the main thread to t
 ### OnGeofenceApiInitializedListener
 
 CT Geofence SDK provides a callback on the main thread to notify that the CTGeofenceAPI class has been initialized. The callback can be used in the following way - 
-```
+```java
 CTGeofenceAPI.getInstance(getApplicationContext())
        .setOnGeofenceApiInitializedListener(new CTGeofenceAPI.OnGeofenceApiInitializedListener() {
            @Override
@@ -124,7 +126,7 @@ CTGeofenceAPI.getInstance(getApplicationContext())
 ### CTGeofenceEventsListener
 
 CT Geofence SDK provides a callback on the main thread to the app when the user enters or exits a Geofence. The callback can be used in the following way -
-```
+```java
 CTGeofenceAPI.getInstance(getApplicationContext())
        .setCtGeofenceEventsListener(new CTGeofenceEventsListener() {
            @Override
@@ -141,7 +143,7 @@ CTGeofenceAPI.getInstance(getApplicationContext())
 
 Structure of JSON Object on Geofence Entered/Exited event :
 
-```
+```JSON
 {
       "id" : 500043 //geofenceUniqueID,
       "gcId" : 1 //geofenceClusterId,
@@ -157,7 +159,7 @@ Structure of JSON Object on Geofence Entered/Exited event :
 ### CTLocationUpdatesListener
 
 CT Geofence SDK provides a callback on the main thread to the app when Android OS provides a location update to the CT Geofence SDK. The callback can be used in the following way -
-```
+```java
 CTGeofenceAPI.getInstance(getApplicationContext())
        .setCtLocationUpdatesListener(new CTLocationUpdatesListener() {
            @Override
@@ -167,26 +169,41 @@ CTGeofenceAPI.getInstance(getApplicationContext())
        });
  ```
 
-## Deactivation
+## ⏹️ Deactivation
 [(Back to top)](#table-of-contents)
 
 If at any point you want to deactivate the CT Geofence SDK, you can do so in the following way-
 
-```CTGeofenceAPI.getInstance(getApplicationContext()).deactivate();```
+```java
+CTGeofenceAPI.getInstance(getApplicationContext()).deactivate();
+```
 
 **Note:** Deactivation will remove all callbacks/listeners as well. 
 
-## Example Usage
+## Proguard 
+
+If you're using ProGuard to minify your app builds, use the following rules for a smooth working of the CleverTap Android Geofence SDK
+
+```proguard
+-keep class com.google.android.gms.common.*
+-keep class com.google.android.gms.location.*
+-keep class androidx.concurrent.futures.*
+```
+
+## 𝌡 Example Usage
 [(Back to top)](#table-of-contents)
 
 A [demo application](https://github.com/CleverTap/clevertap-geofence-android/tree/feature/geofence/SDK-264/app) showing geofence sdk integration.
 
-## FAQ
+## ❓ FAQ
 [(Back to top)](#table-of-contents)
 
 FAQ can be found [here](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/docs/FAQ.md). 
 
-## Questions
+## 🤝 Questions
 [(Back to top)](#table-of-contents)
 
 If your question is not found in FAQ and you have other questions or concerns, you can reach out to the CleverTap support team by raising an issue from the CleverTap Dashboard.
+
+## 📄 License
+CleverTap Geofence is MIT licensed, as found in the [LICENSE](https://github.com/CleverTap/clevertap-geofence-android/blob/feature/geofence/SDK-264/LICENSE) file.
