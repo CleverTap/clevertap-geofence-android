@@ -164,7 +164,7 @@ dependencies {
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.7'
     testImplementation 'org.powermock:powermock-classloading-xstream:1.6.6'
     testImplementation 'eu.codearte.catch-exception:catch-exception:2.0'
-    testImplementation fileTree(dir: 'libs', include: ['*.aar'])
+    testImplementation 'com.clevertap.android:clevertap-android-sdk:3.9.0'
 
     testImplementation 'com.android.installreferrer:installreferrer:1.0'
     testImplementation 'com.google.android.gms:play-services-location:17.0.0'
