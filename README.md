@@ -73,9 +73,9 @@ CTGeofenceSettings ctGeofenceSettings = new CTGeofenceSettings.Builder()
                 .setLocationAccuracy(accuracy)//byte value for Location Accuracy
                 .setLocationFetchMode(fetchMode)//byte value for Fetch Mode
                 .setGeofenceMonitoringCount(geofenceCount)//int value for number of Geofences CleverTap can monitor
-                .setInterval(interval)//long value for interval
-                .setFastestInterval(fastestInterval)//long value for fastest interval
-                .setSmallestDisplacement(displacement)//float value for smallest Displacement
+                .setInterval(interval)//long value for interval in milliseconds
+                .setFastestInterval(fastestInterval)//long value for fastest interval in milliseconds
+                .setSmallestDisplacement(displacement)//float value for smallest Displacement in meters
                 .build();
  ```
 **Note** - 
