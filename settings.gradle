@@ -1,0 +1,2 @@
+include ':app', ':clevertap-geofence-sdk'
+rootProject.name='GeofenceApp'
