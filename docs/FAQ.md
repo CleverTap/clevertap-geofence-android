@@ -23,11 +23,11 @@
    * [SmallestDisplacement in meters](Settings.md#smallestdisplacement-in-meters)
    * [EnableBackgroundLocationUpdates](Settings.md#enablebackgroundlocationupdates)
    
-5. Geofence events Callbacks are not raised sometimes by the SDK
+5. Why are Geofence event callbacks not being called by the SDK?
 
    SDK uses google's geofencing service to monitor geofences, that may not raise events in some situations as described [here](https://developer.android.com/training/location/geofencing#Troubleshooting) 
    
-6. Geofence events Callbacks are raised successfully by the SDK but push notification is not received by device.
+6. Why does the app not receive Push Notifications even though Geofence events are raised correctly?
 
    * First ensure that your CleverTap push notifications integration is working properly as described in [this guide](https://developer.clevertap.com/docs/android#section-push-notifications).<br>
    * For Android 6.0 or higher due to [Doze-Standby](https://developer.android.com/training/monitoring-device-state/doze-standby) and For Android 9.0 or higher due to [App standby buckets](https://developer.android.com/topic/performance/appstandby) network connectivity for apps gets deferred by some time as described [here in Network Column](https://developer.android.com/topic/performance/power/power-details) which prevents SDK to connect to CleverTap servers for raising notifications.
